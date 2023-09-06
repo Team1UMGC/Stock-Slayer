@@ -10,6 +10,11 @@ import java.util.List;
 
 public class StockSlayer {
     private JFrame frame;
+    private JPanel loginPanel;
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
+    private JButton registerButton; // new registration
     private JPanel topPanel;
     private JPanel bottomPanel;
     private JPanel infoPanel;
@@ -23,22 +28,113 @@ public class StockSlayer {
     private JPanel buttonsPanel;
     private JButton buyButton;
     private JButton sellButton;
-    private JButton sortSharesButton; // Button to sort by shares
-    private JButton sortHighestValueButton; // Button to sort by highest value
-    private JButton sortLowestValueButton; // Button to sort by lowest value
+    private JButton sortSharesButton; // sort by shares
+    private JButton sortHighestValueButton; // sort by highest value
+    private JButton sortLowestValueButton; // sort by lowest value
     private List<Stock> heldStocks;
 
     public StockSlayer() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        initializeLogin();
+    }
 
+    private void initializeLogin() {
+    frame = new JFrame("Stock Slayer - Login");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(400, 300); 
+    frame.setLayout(new BorderLayout());
+
+    loginPanel = new JPanel(new GridBagLayout()); 
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(5, 5, 5, 5);
+
+    JLabel logoLabel = new JLabel(new ImageIcon("stock-slayer-logo-login.png"));
+    logoLabel.setPreferredSize(new Dimension(175, 100));
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 2;
+    loginPanel.add(logoLabel, gbc);
+
+    JLabel usernameLabel = new JLabel("Username:");
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    gbc.gridwidth = 1;
+    loginPanel.add(usernameLabel, gbc);
+
+    usernameField = new JTextField(20); 
+    gbc.gridx = 1;
+    gbc.gridy = 1;
+    loginPanel.add(usernameField, gbc);
+
+    JLabel passwordLabel = new JLabel("Password:");
+    gbc.gridx = 0;
+    gbc.gridy = 2;
+    loginPanel.add(passwordLabel, gbc);
+
+    passwordField = new JPasswordField(20); 
+    gbc.gridx = 1;
+    gbc.gridy = 2;
+    loginPanel.add(passwordField, gbc);
+
+    loginButton = new JButton("Login");
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    gbc.gridwidth = 2;
+    gbc.anchor = GridBagConstraints.CENTER;
+    loginPanel.add(loginButton, gbc);
+
+    registerButton = new JButton("Register");
+    gbc.gridx = 0;
+    gbc.gridy = 4;
+    gbc.gridwidth = 2;
+    loginPanel.add(registerButton, gbc);
+
+    frame.add(loginPanel, BorderLayout.CENTER);
+
+    loginButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Check the login credentials
+            String username = usernameField.getText();
+            char[] password = passwordField.getPassword();
+            String enteredPassword = new String(password); // convert password to a string
+    
+            if ("test".equals(username) && "password".equals(enteredPassword)) {
+                frame.getContentPane().removeAll(); // remove login panel ***not working for some reason, try .dispose()?
+                initializeMainApplication();
+                frame.revalidate();
+                frame.repaint();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Invalid login credentials.");
+            }
+        }
+    });
+    
+
+    registerButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            //  registration logic/open a registration window
+            JOptionPane.showMessageDialog(frame, "Registration not yet implemented");
+        }
+    });
+
+    frame.setVisible(true);
+}
+
+    
+    
+
+    private boolean isValidLogin(String username, char[] password) {
+        // replace with login validation logic
+        // remove return true; below once logic is added of course
+        return true;
+    }
+
+    private void initializeMainApplication() {
         frame = new JFrame("Stock Slayer");
-        frame.setLayout(new BorderLayout());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 400);
+        frame.setSize(800, 600);
+        frame.setLayout(new BorderLayout());
 
         topPanel = new JPanel();
         topPanel.setLayout(new FlowLayout());
@@ -112,7 +208,6 @@ public class StockSlayer {
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String stockSymbol = stockNameField.getText();
-        
 
                 // open the stock info window
                 openStockInfoWindow(stockSymbol, 0.0); // replace 0.0 with the actual stock price from API
@@ -199,14 +294,6 @@ public class StockSlayer {
         frame.setVisible(true);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new StockSlayer();
-            }
-        });
-    }
-
     private class Stock {
         private String symbol;
         private String name;
@@ -223,14 +310,14 @@ public class StockSlayer {
 
     private void displayHeldStocks() {
         heldStocksTableModel.setRowCount(0); // clears table
-        DecimalFormat df = new DecimalFormat("#.00"); // Format for two decimal places
+        DecimalFormat df = new DecimalFormat("#.00"); // format for two decimal places
         for (Stock stock : heldStocks) {
-            double totalValue = stock.price * stock.shares; // Calculate total value
+            double totalValue = stock.price * stock.shares; // calculate total value
             Object[] rowData = {
-                stock.symbol + " (" + stock.name + ")",
-                stock.price,
-                stock.shares,
-                df.format(totalValue) // Format total value
+                    stock.symbol + " (" + stock.name + ")",
+                    stock.price,
+                    stock.shares,
+                    df.format(totalValue) // format total value
             };
             heldStocksTableModel.addRow(rowData);
         }
@@ -287,14 +374,22 @@ public class StockSlayer {
 
         buyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Handle buying logic here
+                // buying logic here
                 int sharesToBuy = Integer.parseInt(sharesField.getText());
-                // Add your logic to process the purchase
+                // purchase processing logic here
                 JOptionPane.showMessageDialog(frame, "Bought " + sharesToBuy + " shares of " + stockName);
-                infoFrame.dispose(); // Close the info window after buying
+                infoFrame.dispose();
             }
         });
 
         infoFrame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new StockSlayer();
+            }
+        });
     }
 }

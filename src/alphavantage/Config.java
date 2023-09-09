@@ -1,7 +1,7 @@
 package src.alphavantage;
 
 public class Config {
-    public static final String BASE_URL = "https://www.alphavantage.co/query?";
+    public final String BASE_URL = "https://www.alphavantage.co/query?";
     private String apiKey;
 
     public Config(String apiKey) {

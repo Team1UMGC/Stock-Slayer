@@ -1,4 +1,4 @@
-package src;
+package com.stockslayer;
 
 import javax.swing.*;
 import javax.swing.border.*;

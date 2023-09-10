@@ -16,22 +16,14 @@ public class Main {
 
         // Get and Configure API Key
     	Stock IBM = new Stock("IBM");
+    	
     	try {
-			IBM.printIntraDay(Interval.FIVE_MIN, OutputSize.COMPACT);
-		} catch (configNotDefinedException e) {
-			e.printStackTrace();
-		}
+    		String IBMStockStr = IBM.getIntraDayString(Interval.FIVE_MIN, OutputSize.COMPACT);
+    		System.out.println(IBMStockStr);
+    	} catch (configNotDefinedException e) {
+    		e.printStackTrace();
+    	}
 
     }
-
-//    public static void handleSuccess(TimeSeriesResponse response) {
-//        System.out.println(response.getMetaData().toString());
-//        System.exit(0);
-//    }
-//
-//    public static void handleFailure(AlphaVantageException response) {
-//        System.out.println(response.getMessage());
-//        System.exit(1);
-//    }
 
 }

@@ -1,10 +1,8 @@
 package com.stockslayer;
 
-import com.crazzyghost.alphavantage.*;
-import com.crazzyghost.alphavantage.parameters.*;
-import com.crazzyghost.alphavantage.timeseries.response.*;
-
-import io.github.cdimascio.dotenv.*;
+import com.stockslayer.api.*;
+import com.crazzyghost.alphavantage.parameters.Interval;
+import com.crazzyghost.alphavantage.parameters.OutputSize;
 
 // import javax.swing.SwingUtilities;
 
@@ -17,31 +15,23 @@ public class Main {
         // });
 
         // Get and Configure API Key
-        String apiKey = Dotenv.load().get("ALPHA_VANTAGE_API_KEY");
-
-        Config cfg = Config.builder().key(apiKey).timeOut(10).build();
-        AlphaVantage.api().init(cfg);
-
-        AlphaVantage.api()
-                .timeSeries()
-                .intraday()
-                .forSymbol("IBM")
-                .interval(Interval.FIVE_MIN)
-                .outputSize(OutputSize.FULL)
-                .onSuccess(e -> handleSuccess((TimeSeriesResponse) e))
-                .onFailure(e -> handleFailure(e))
-                .fetch();
+    	Stock IBM = new Stock("IBM");
+    	try {
+			IBM.printIntraDay(Interval.FIVE_MIN, OutputSize.COMPACT);
+		} catch (configNotDefinedException e) {
+			e.printStackTrace();
+		}
 
     }
 
-    public static void handleSuccess(TimeSeriesResponse response) {
-        System.out.println(response.getMetaData().toString());
-        System.exit(0);
-    }
-
-    public static void handleFailure(AlphaVantageException response) {
-        System.out.println(response.getMessage());
-        System.exit(1);
-    }
+//    public static void handleSuccess(TimeSeriesResponse response) {
+//        System.out.println(response.getMetaData().toString());
+//        System.exit(0);
+//    }
+//
+//    public static void handleFailure(AlphaVantageException response) {
+//        System.out.println(response.getMessage());
+//        System.exit(1);
+//    }
 
 }

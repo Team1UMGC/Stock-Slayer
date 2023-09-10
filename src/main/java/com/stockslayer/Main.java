@@ -16,7 +16,7 @@ public class Main {
         // }
         // });
 
-        // Get and Config API Key
+        // Get and Configure API Key
         String apiKey = Dotenv.load().get("ALPHA_VANTAGE_API_KEY");
 
         Config cfg = Config.builder().key(apiKey).timeOut(10).build();

@@ -8,6 +8,12 @@ public class User {
 	String password;
 	ArrayList<Stock> ownedStocks = new ArrayList<Stock>();
 	
+	User() {
+		this.id = 0;
+		this.email = "";
+		this.password = "";
+	}
+	
 	User(String email, String password){
 		this.email = email;
 		this.password = password;
@@ -32,6 +38,10 @@ public class User {
 		System.out.println("email : " + this.email);
 		System.out.println("password : " + this.password);
 		System.out.println("num of stocks : " + this.ownedStocks.size());
+		ownedStocks.forEach(e->{
+			System.out.println();
+			e.printStockData();
+			});
 	}
 	
 	public int getID() {
@@ -60,5 +70,9 @@ public class User {
 	
 	public ArrayList<Stock> getStocks(){
 		return this.ownedStocks;
+	}
+	
+	public void setStocks(ArrayList<Stock> stocks) {
+		this.ownedStocks = stocks;
 	}
 }

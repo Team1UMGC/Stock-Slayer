@@ -1,6 +1,7 @@
 package com.stockslayer.db;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.io.File;
 import java.nio.file.*;
 
@@ -83,7 +84,7 @@ public class Slayer_DB {
 	/**
 	 * Inserts new user information into the database
 	 * @param user object that contains user data such as email and password
-	 * @throws Exception If the database does not exist an exception is thrown
+	 * @throws Exception If the database does not exist or if user already exists in database
 	 */
 	private static User insertNewUser(User user) throws Exception {
 		checkDatabaseExists();
@@ -93,6 +94,8 @@ public class Slayer_DB {
 			connection = DriverManager.getConnection(dbConnectionPath);
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
+			
+			if(userExists(user)) throw new Exception("User already exists in database!");
 			
 			statement.executeUpdate(String.format("INSERT INTO user (email, password) VALUES('%1$s', '%2$s')", 
 					user.getEmail(),
@@ -118,9 +121,9 @@ public class Slayer_DB {
 	}
 	
 	/**
-	 * TODO document
-	 * @param user
-	 * @throws Exception
+	 * Deletes user from the database
+	 * @param user user that is to be removed from database. Uses the email of the user.
+	 * @throws Exception If database does not exist or the user cannot be found in the database.
 	 */
 	private static void deleteUser(User user) throws Exception {
 		checkDatabaseExists();
@@ -146,6 +149,59 @@ public class Slayer_DB {
 				System.err.println(e.getMessage());
 			}
 		}
+	}
+	
+	private static User getUser(String email) throws Exception{
+		checkDatabaseExists();
+		
+		User acquiredUser = new User();
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection(dbConnectionPath);
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30);
+			
+			if(!userExists(email)) throw new Exception("User not found!");
+			
+			// Get user based information
+			ResultSet userRs = statement.executeQuery(String.format("SELECT * FROM user WHERE email='%s'", email));
+			int id = userRs.getInt("user_id");
+			String password = userRs.getString("password");
+			
+			// Get stock based information from user
+			ArrayList<Stock> stocks = new ArrayList<Stock>();
+			ResultSet stockRs = statement.executeQuery(String.format("SELECT * FROM stock WHERE owner_id='%d'", id));
+			while(stockRs.next()) {
+				int stockID = stockRs.getInt("stock_id");
+				int ownerID = stockRs.getInt("owner_id");
+				String symbol = stockRs.getString("symbol");
+				double volume = stockRs.getDouble("volume");
+				double value = stockRs.getDouble("value");
+				
+				Stock stock = new Stock(stockID, ownerID, symbol, volume, value);
+				stocks.add(stock);
+			}
+			
+			// update created user object with acquired information
+			acquiredUser.setID(id);
+			acquiredUser.setEmail(email);
+			acquiredUser.setPassword(password);
+			acquiredUser.setStocks(stocks);
+			
+			
+		} catch(SQLException e) {
+			System.err.println(e.getMessage());
+		} finally {
+			try {
+				if(connection != null) {
+					connection.close();
+				}
+			} catch(SQLException e) {
+				System.err.println(e.getMessage());
+			}
+		}
+		
+		return acquiredUser;
 	}
 	
 	
@@ -228,6 +284,13 @@ public class Slayer_DB {
 	}
 	
 	
+	/**
+	 * Adds stock to the stock table with the owner_id dependent on the user parameter
+	 * @param user User that is buying new stock
+	 * @param stock The Stock information to be stored
+	 * @return returns a user object that is the updated version of the user parameter.
+	 * @throws Exception Thrown if database does not exist or the user in the user table is not found.
+	 */
 	private static User addNewStock(User user, Stock stock) throws Exception {
 		checkDatabaseExists();
 		
@@ -263,6 +326,10 @@ public class Slayer_DB {
 		return user;
 	}
 	
+	private static User deleteStock(User user, Stock stock) throws Exception { // TODO, needs some helper methods to read already owned stock from the stock table
+		return user;
+	}
+	
 	
 	/**
 	 * Checks if the user exists in the database by matching user.email in the users table, email column.
@@ -281,6 +348,41 @@ public class Slayer_DB {
 			statement.setQueryTimeout(30);
 			
 			ResultSet rs = statement.executeQuery(String.format("SELECT * FROM user WHERE email LIKE '%s'", user.getEmail()));
+			if(rs.next()) userExists = true;
+			
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		} finally {
+			try {
+				if(connection != null) {
+					connection.close();
+				}
+			} catch(SQLException e) {
+				System.err.println(e.getMessage());
+			}
+		}
+		
+		return userExists;
+	}
+	
+	
+	/**
+	 * Checks if the user exists in the database using a provided email sting
+	 * @param email Email of the user that is being looked for
+	 * @return If user exists, true, if no user is found, then false
+	 * @throws Exception Thrown if database cannot be found.
+	 */
+	public static Boolean userExists(String email) throws Exception {
+		checkDatabaseExists();
+		Boolean userExists = false;
+		
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection(dbConnectionPath);
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30);
+			
+			ResultSet rs = statement.executeQuery(String.format("SELECT * FROM user WHERE email LIKE '%s'", email));
 			if(rs.next()) userExists = true;
 			
 		} catch (SQLException e) {
@@ -333,6 +435,10 @@ public class Slayer_DB {
 		}
 	}
 	
+	/**
+	 * Prints the stock table from the database to the console.
+	 * @throws Exception If the database does not exist
+	 */
 	private static void printStockTable() throws Exception {
 		checkDatabaseExists();
 		
@@ -343,7 +449,8 @@ public class Slayer_DB {
 			statement.setQueryTimeout(30);
 			ResultSet rs = statement.executeQuery("SELECT * FROM stock");
 			while(rs.next()) {
-				System.out.println(String.format("%1$d\t%2$s\t%3$f\t%4$f", 
+				System.out.println(String.format("%1$d\t%2$d\t%3$s\t%4$f\t%5$f", 
+						rs.getInt("stock_id"),
 						rs.getInt("owner_id"),
 						rs.getString("symbol"),
 						rs.getDouble("volume"),
@@ -389,16 +496,17 @@ public class Slayer_DB {
 			
 			testUser = addNewStock(testUser, testStock);
 			user = addNewStock(user, stock);
+			user = addNewStock(user, testStock);
 			
 			printStockTable();
 			printUserTable();
+			
+			User dbUser = getUser(user.getEmail());
+			dbUser.printData();
 			
 			
 		}catch(Exception e) {
 			System.err.println(e.getMessage());
 		}
-		
-		
-		// TODO, change volume and value from stocks object to double
 	}
 }

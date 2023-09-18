@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.io.File;
 import java.nio.file.*;
 
+/**
+ * Contains all methods and data needed to create, read, update, and delete information
+ * in the stored database to do with users and their owned stocks.
+ */
 public class Slayer_DB {
 	static private String dbFileName = "users.db"; 								// file name for db
 	static private Path dbPackagePath = Paths.get("src/main/db");				// relative path for db
@@ -151,6 +155,12 @@ public class Slayer_DB {
 		}
 	}
 	
+	/**
+	 * Creates a user object from a given email found in the database
+	 * @param email String of the user's email used to find them in the database
+	 * @return Returns a user object with all the data related to the user
+	 * @throws Exception Thrown if the database or user cannot be found
+	 */
 	public static User getUser(String email) throws Exception{
 		checkDatabaseExists();
 		
@@ -375,7 +385,14 @@ public class Slayer_DB {
 		return user;
 	}
 	
-	public static User deleteStock(User user, Stock stock) throws Exception { // TODO, needs some helper methods to read already owned stock from the stock table
+	/**
+	 * Deletes stock data from the database
+	 * @param user Is used to update the local user object in memory
+	 * @param stock Used to get the stock id to find which stock to remove
+	 * @return Returns User object that is an updated version of the user in parameters
+	 * @throws Exception Thrown if the database or user cannot be found
+	 */
+	public static User deleteStock(User user, Stock stock) throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -575,7 +592,6 @@ public class Slayer_DB {
 			printStockTable();
 			printUserTable();
 			
-			ArrayList<Stock> userStocks = getStocks(user);
 			user = deleteStock(user, user.getStocks().get(0));
 			
 			printStockTable();

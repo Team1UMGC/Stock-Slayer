@@ -573,34 +573,34 @@ public class Slayer_DB {
 		}
 	}
 	
-	public static void main(String[] args){
-		printDebugInfo();
-		User testUser = new User("test@test.com", "p@ssW0rd");
-		User user = new User("CStoner00@StockSlayer.com", "3t7d@vy");
-		
-		Stock testStock = new Stock("DOW", 500, 36);
-		Stock stock = new Stock("IBM", 300, 24);
-		try {
-			create_DB();
-			testUser = insertNewUser(testUser);
-			user = insertNewUser(user);
-			
-			testUser = addStock(testUser, testStock);
-			user = addStock(user, stock);
-			user = addStock(user, testStock);
-			
-			printStockTable();
-			printUserTable();
-			
-			user = deleteStock(user, user.getStocks().get(0));
-			
-			printStockTable();
-			printUserTable();
-			
-			user.printData();
-			
-		}catch(Exception e) {
-			System.err.println(e.getMessage());
-		}
-	}
+//	public static void main(String[] args){
+//		printDebugInfo();
+//		User testUser = new User("test@test.com", "p@ssW0rd");
+//		User user = new User("CStoner00@StockSlayer.com", "3t7d@vy");
+//		
+//		Stock testStock = new Stock("DOW", 500, 36);
+//		Stock stock = new Stock("IBM", 300, 24);
+//		try {
+//			create_DB();
+//			testUser = insertNewUser(testUser);
+//			user = insertNewUser(user);
+//			
+//			testUser = addStock(testUser, testStock);
+//			user = addStock(user, stock);
+//			user = addStock(user, testStock);
+//			
+//			printStockTable();
+//			printUserTable();
+//			
+//			user = deleteStock(user, user.getStocks().get(0));
+//			
+//			printStockTable();
+//			printUserTable();
+//			
+//			user.printData();
+//			
+//		}catch(Exception e) {
+//			System.err.println(e.getMessage());
+//		}
+//	}
 }

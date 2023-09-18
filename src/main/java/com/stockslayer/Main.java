@@ -15,7 +15,7 @@ public class Main {
         // });
 
         // Get and Configure API Key
-    	Stock IBM = new Stock("IBM");
+    	API_Stock IBM = new API_Stock("IBM");
     	
     	try {
     		String IBMStockStr = IBM.getIntraDayString(Interval.FIVE_MIN, OutputSize.COMPACT);

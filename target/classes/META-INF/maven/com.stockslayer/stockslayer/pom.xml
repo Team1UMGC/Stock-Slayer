@@ -40,15 +40,12 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
-<<<<<<< HEAD
-=======
         
-       	<dependency>
-    		<groupId>org.xerial</groupId>
-    		<artifactId>sqlite-jdbc</artifactId>
-    		<version>3.43.0.0</version>
+        <dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.43.0.0</version>
 		</dependency>
->>>>>>> db
 
     </dependencies>
 </project>

@@ -14,7 +14,7 @@ public class Slayer_DB {
 	static private String dbConnectionPath = "jdbc:sqlite:" + dbWorkingFile.getAbsolutePath(); // Using File object to 
 																							   // create legal path name for db connection
 	
-	static boolean isDebug = true; // If debug mode is true, when create_DB is called, overwrite the db.
+	static private boolean isDebug = true; // If debug mode is true, when create_DB is called, overwrite the db.
 	
 	
 	/**
@@ -34,7 +34,7 @@ public class Slayer_DB {
 	 * Only overwrites the database user table if isDebug is true.
 	 * @throws Exception gets thrown if the database already exist and does not need to be created.
 	 */
-	private static void create_DB() throws Exception {
+	public static void create_DB() throws Exception {
 		if(dbWorkingFile.exists() && !isDebug) {
 			throw new Exception("Database already exists!");
 		}
@@ -86,7 +86,7 @@ public class Slayer_DB {
 	 * @param user object that contains user data such as email and password
 	 * @throws Exception If the database does not exist or if user already exists in database
 	 */
-	private static User insertNewUser(User user) throws Exception {
+	public static User insertNewUser(User user) throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -125,7 +125,7 @@ public class Slayer_DB {
 	 * @param user user that is to be removed from database. Uses the email of the user.
 	 * @throws Exception If database does not exist or the user cannot be found in the database.
 	 */
-	private static void deleteUser(User user) throws Exception {
+	public static void deleteUser(User user) throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -151,7 +151,7 @@ public class Slayer_DB {
 		}
 	}
 	
-	private static User getUser(String email) throws Exception{
+	public static User getUser(String email) throws Exception{
 		checkDatabaseExists();
 		
 		User acquiredUser = new User();
@@ -212,7 +212,7 @@ public class Slayer_DB {
 	 * @return Returns a new updated user object. This should replace the parameter user.
 	 * @throws Exception If the database is not found, or the user was not found in the database.
 	 */
-	private static User updateEmail(User user, String newEmail) throws Exception {
+	public static User updateEmail(User user, String newEmail) throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -252,7 +252,7 @@ public class Slayer_DB {
 	 * @return Returns a user object so that the called object can be updated in memory for future updates.
 	 * @throws Exception Throws if database cannot be found or if user is not found.
 	 */
-	private static User updatePassword(User user, String newPassword) throws Exception {
+	public static User updatePassword(User user, String newPassword) throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -283,6 +283,51 @@ public class Slayer_DB {
 		return user;
 	}
 	
+	/**
+	 * Gets array list of all stocks associated with the parameter user
+	 * @param user The user who owns all the stocks that is being returned
+	 * @return returns ArrayList<Stock> of all stocks owned by user
+	 * @throws Exception thrown if database or user cannot be found
+	 */
+	public static ArrayList<Stock> getStocks(User user) throws Exception {
+		checkDatabaseExists();
+		
+		ArrayList<Stock> stocks = new ArrayList<Stock>();
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection(dbConnectionPath);
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30);
+			
+			if(!userExists(user)) throw new Exception("User not found!");
+			
+			ResultSet rs = statement.executeQuery(String.format("SELECT * FROM stock WHERE owner_id='%s'", user.getID()));
+			while(rs.next()) {
+				int stockID = rs.getInt("stock_id");
+				int ownerID = rs.getInt("owner_id");
+				String symbol = rs.getString("symbol");
+				double volume = rs.getDouble("volume");
+				double value = rs.getDouble("value");
+				
+				Stock stock = new Stock(stockID, ownerID, symbol, volume, value);
+				stocks.add(stock);
+			}
+			
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		} finally {
+			try {
+				if(connection != null) {
+					connection.close();
+				}
+			} catch(SQLException e) {
+				System.err.println(e.getMessage());
+			}
+		}
+		
+		return stocks;
+	}
+	
 	
 	/**
 	 * Adds stock to the stock table with the owner_id dependent on the user parameter
@@ -291,7 +336,7 @@ public class Slayer_DB {
 	 * @return returns a user object that is the updated version of the user parameter.
 	 * @throws Exception Thrown if database does not exist or the user in the user table is not found.
 	 */
-	private static User addNewStock(User user, Stock stock) throws Exception {
+	public static User addStock(User user, Stock stock) throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -309,6 +354,10 @@ public class Slayer_DB {
 					stock.getVolume(),
 					stock.getValue())
 					);
+			ResultSet rs = statement.executeQuery("SELECT * FROM stock WHERE stock_id=(SELECT MAX(stock_id) FROM stock)");
+			
+			stock.setStockID(rs.getInt("stock_id"));
+			stock.setOwnerID(user.getID());
 			user.addStock(stock);
 			
 		} catch (SQLException e) {
@@ -326,7 +375,32 @@ public class Slayer_DB {
 		return user;
 	}
 	
-	private static User deleteStock(User user, Stock stock) throws Exception { // TODO, needs some helper methods to read already owned stock from the stock table
+	public static User deleteStock(User user, Stock stock) throws Exception { // TODO, needs some helper methods to read already owned stock from the stock table
+		checkDatabaseExists();
+		
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection(dbConnectionPath);
+			Statement statement = connection.createStatement();
+			statement.setQueryTimeout(30);
+			
+			if(!userExists(user)) throw new Exception("User not found!");
+			
+			statement.executeUpdate(String.format("DELETE FROM stock WHERE stock_id='%d'", stock.stockID));
+			user.removeStock(stock.getStockID());
+			
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		} finally {
+			try {
+				if(connection != null) {
+					connection.close();
+				}
+			} catch(SQLException e) {
+				System.err.println(e.getMessage());
+			}
+		}
+		
 		return user;
 	}
 	
@@ -404,7 +478,7 @@ public class Slayer_DB {
 	 * Prints all entries from the users table in the users.db
 	 * @throws Exception throws if the database cannot be found.
 	 */
-	private static void printUserTable() throws Exception {
+	public static void printUserTable() throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -439,7 +513,7 @@ public class Slayer_DB {
 	 * Prints the stock table from the database to the console.
 	 * @throws Exception If the database does not exist
 	 */
-	private static void printStockTable() throws Exception {
+	public static void printStockTable() throws Exception {
 		checkDatabaseExists();
 		
 		Connection connection = null;
@@ -476,7 +550,7 @@ public class Slayer_DB {
 	 * Throws exception if there is no database found, does nothing if one is found.
 	 * @throws Exception gets thrown if no database is found.
 	 */
-	private static void checkDatabaseExists() throws Exception {
+	public static void checkDatabaseExists() throws Exception {
 		if(!dbWorkingFile.exists()) {
 			throw new Exception("No Database Found!");
 		}
@@ -494,16 +568,20 @@ public class Slayer_DB {
 			testUser = insertNewUser(testUser);
 			user = insertNewUser(user);
 			
-			testUser = addNewStock(testUser, testStock);
-			user = addNewStock(user, stock);
-			user = addNewStock(user, testStock);
+			testUser = addStock(testUser, testStock);
+			user = addStock(user, stock);
+			user = addStock(user, testStock);
 			
 			printStockTable();
 			printUserTable();
 			
-			User dbUser = getUser(user.getEmail());
-			dbUser.printData();
+			ArrayList<Stock> userStocks = getStocks(user);
+			user = deleteStock(user, user.getStocks().get(0));
 			
+			printStockTable();
+			printUserTable();
+			
+			user.printData();
 			
 		}catch(Exception e) {
 			System.err.println(e.getMessage());

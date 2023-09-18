@@ -13,6 +13,8 @@ public class Stock {
 		this.symbol = symbol;
 		this.volume = volume;
 		this.value = value;
+		
+		
 	}
 	
 	public Stock(String symbol, double volume, double value) {
@@ -27,6 +29,22 @@ public class Stock {
 		System.out.println("symbol : " + this.symbol);
 		System.out.println("volume : " + this.volume);
 		System.out.println("value : " + this.value);
+	}
+	
+	public int getStockID() {
+		return this.stockID;
+	}
+	
+	public void setStockID(int stockID) {
+		this.stockID = stockID;
+	}
+	
+	public int getOwnerID() {
+		return this.ownerID;
+	}
+	
+	public void setOwnerID(int ownerID) {
+		this.ownerID = ownerID;
 	}
 	
 	public String getSymbol(){

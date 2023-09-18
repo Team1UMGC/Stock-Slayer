@@ -33,6 +33,21 @@ public class User {
 		setPassword(password);
 	}
 	
+	public void removeStock(int stockID) {
+		boolean stockFound = false;
+		int removalIndex = 0;
+		for(int i = 0; i < ownedStocks.size(); i++) {
+			Stock stock = ownedStocks.get(i);
+			if(stock.getStockID() == stockID) {
+				stockFound = true;
+				removalIndex = i;
+				break;
+			}
+		}
+		
+		if(stockFound) ownedStocks.remove(removalIndex);
+	}
+	
 	public void printData() {
 		System.out.println("id : " + this.id);
 		System.out.println("email : " + this.email);

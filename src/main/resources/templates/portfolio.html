@@ -1,0 +1,45 @@
+<!-- Need to finish the controller for portfolio on the actual application code.-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+</head>
+<body>
+    <h1>My Portfolio</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Price</th>
+                <th>Shares</th>
+                <th>Total Value</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through the user's portfolio stocks -->
+            <th:block th:each="stock, iterStat : ${heldStocks}">
+                <tr>
+                    <td th:text="${stock.symbol}"></td>
+                    <td th:text="${stock.price}"></td>
+                    <td th:text="${stock.shares}"></td>
+                    <td th:text="${stock.price * stock.shares}"></td>
+                    <td>
+                        <form th:action="@{'/sell/' + ${iterStat.index}}" method="post">
+                            <button type="submit">Sell</button>
+                        </form>
+                    </td>
+                </tr>
+            </th:block>
+        </tbody>
+    </table>
+
+    <p>Total Funds: <span th:text="${userFunds}"></span></p>
+
+    <a href="/main">Back to Main</a>
+</body>
+</html>

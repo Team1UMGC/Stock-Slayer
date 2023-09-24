@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Slayer</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file for styling -->
+</head>
+<body>
+    <header>
+        <img src="/images/stock-slayer-logo.png" alt="Stock Slayer Logo" width="200">
+        <h1>Welcome to Stock Slayer</h1>
+    </header>
+
+    <main>
+        <!-- Stock Search Form -->
+        <form th:action="@{/search}" method="post">
+            <label for="stockName">Enter Stock Symbol:</label>
+            <input type="text" id="stockName" name="stockName">
+            <button type="submit">Search</button>
+        </form>
+
+        <!-- Display Stock Information if available -->
+        <div th:if="${stockName}">
+            <h2 th:text="'Stock Information for ' + ${stockName}"></h2>
+            <p>Stock Symbol: <span th:text="${stockName}"></span></p>
+            <p>Stock Price: <span th:text="${stockPrice}"></span></p>
+            <!-- Add Buy and Sell buttons here -->
+            <form th:action="@{/buy}" method="post">
+                <input type="hidden" name="symbol" th:value="${stockName}">
+                <input type="hidden" name="price" th:value="${stockPrice}">
+                <label for="buyShares">Enter Number of Shares to Buy:</label>
+                <input type="number" id="buyShares" name="buyShares" min="1" required>
+                <button type="submit">Buy</button>
+            </form>
+            <form th:action="@{/sell}" method="post">
+                <input type="hidden" name="symbol" th:value="${stockName}">
+                <input type="hidden" name="price" th:value="${stockPrice}">
+                <label for="sellShares">Enter Number of Shares to Sell:</label>
+                <input type="number" id="sellShares" name="sellShares" min="1" required>
+                <button type="submit">Sell</button>
+            </form>
+        </div>
+
+        <!-- Following is for displaying users stock on main page, needs to be refined.
+
+        <h2>Your Held Stocks</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stock</th>
+                    <th>Stock Price</th>
+                    <th>Shares Owned</th>
+                    <th>Total Value</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr th:each="heldStock, rowStat : ${heldStocks}">
+                    <td th:text="${heldStock.symbol}"></td>
+                    <td th:text="${heldStock.price != null ? #numbers.formatDecimal(heldStock.price, '0.00') : 'N/A'}" />
+                    <td th:text="${heldStock.shares != null ? heldStock.shares : 'N/A'}" />
+                    <td th:text="${heldStock.price != null && heldStock.shares != null ? #numbers.formatDecimal(heldStock.price * heldStock.shares, '0.00') : 'N/A'}" />
+                    <td>
+
+                        <form th:action="@{/sell/{index}(index=${rowStat.index})}" method="post">
+                            <button type="submit">Sell</button>
+                        </form>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+
+        <div class="action-buttons">
+
+            
+            <a href="/portfolio" class="portfolio-button">View Portfolio</a>
+        </div>
+    -->
+    </main>
+
+</body>
+</html>

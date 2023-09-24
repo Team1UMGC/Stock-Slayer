@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login - Stock Slayer</title>
+</head>
+<body>
+    <div>
+        <img src="/images/stock-slayer-logo.png" alt="Stock Slayer Logo" width="200">
+    </div>
+    <h1>Login to Stock Slayer</h1>
+    
+    <form th:action="@{/login/authenticate}" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>

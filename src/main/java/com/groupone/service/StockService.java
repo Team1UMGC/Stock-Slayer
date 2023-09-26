@@ -22,16 +22,6 @@ public class StockService {
     @Autowired
     DatabaseAPI databaseAPI;
 
-//    private final boolean demoMode = true;
-
-//    private final HashMap<String, List<StockUnit>> demoStocks = stockAPI.getMultipleIntraDayStockUnits( TODO Fix nullPointerException Error when calling method
-//            List.of("GOOGL", "TSLA", "AMZN"));
-
-//    private boolean isHeld(String symbol){
-//        List<StockUnit> stockUnits = demoStocks.get(symbol);
-//        return stockUnits != null;
-//    }
-
 
     public List<Stock> getHeldStocks() {
         //TODO write method body

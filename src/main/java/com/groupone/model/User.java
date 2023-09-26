@@ -120,7 +120,7 @@ public class User {
 	 * Returns the id of the user
 	 * @return integer, returns id of user
 	 */
-	public int getID() {
+	public int getId() {
 		return this.id;
 	}
 	
@@ -128,7 +128,7 @@ public class User {
 	 * Sets the id of the user
 	 * @param id integer to be set as the new user id
 	 */
-	public void setID(int id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	

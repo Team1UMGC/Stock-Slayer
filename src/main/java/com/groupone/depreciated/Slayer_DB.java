@@ -48,7 +48,7 @@ public class Slayer_DB {
 
             ResultSet rs = statement.executeQuery(String.format(
                     "SELECT * FROM stock WHERE owner_id='%d'",
-                    user.getID()));
+                    user.getId()));
             while (rs.next()) {
                 int stockID = rs.getInt("stock_id");
                 int ownerID = rs.getInt("owner_id");
@@ -104,14 +104,14 @@ public class Slayer_DB {
                         "UPDATE stock SET volume=%1$f, value=%2$f WHERE owner_id=%3$d AND symbol='%4$s'",
                         stock.getVolume(),
                         stock.getValue(),
-                        user.getID(),
+                        user.getId(),
                         stock.getSymbol()
                 ));
             } else {
                 // Insert a new stock record for the user
                 statement.executeUpdate(String.format(
                         "INSERT INTO stock (owner_id, symbol, volume, value) VALUES(%1$d, '%2$s', %3$f, %4$f)",
-                        user.getID(),
+                        user.getId(),
                         stock.getSymbol(),
                         stock.getVolume(),
                         stock.getValue()
@@ -146,7 +146,7 @@ public class Slayer_DB {
 
             statement.executeUpdate(String.format(
                     "DELETE FROM stock WHERE owner_id=%1$d AND symbol='%2$s'",
-                    user.getID(),
+                    user.getId(),
                     symbol
             ));
 

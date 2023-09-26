@@ -27,7 +27,14 @@ public class Stock {
 		this.volume = volume;
 		this.value = value;
 	}
-	
+
+	public Stock(int ownerID, String symbol, double volume, double value) {
+		this.ownerID = ownerID;
+		this.symbol = symbol;
+		this.volume = volume;
+		this.value = value;
+	}
+
 	/**
 	 * Creates a partly made Stock object with only symbol, volume, and value filled out. No associated user or stock id.
 	 * @param symbol String symbol of the stock, such as "IBM" or "APPL"

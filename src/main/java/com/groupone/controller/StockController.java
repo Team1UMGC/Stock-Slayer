@@ -2,6 +2,7 @@ package com.groupone.controller;
 
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.groupone.service.StockService;
+import com.groupone.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,8 +16,13 @@ public class StockController {
     @Autowired
     StockService stockService;
 
+    @Autowired
+    UserService userService;
+
     @GetMapping("/main")
     public String mainPage(Model model){
+        if(userService.getLogged() == null) return "login";
+
         model.addAttribute("heldStocks", stockService.getHeldStocks());
         model.addAttribute("stockPrices", stockService.getStockPrices());
         model.addAttribute("userFunds", stockService.getUserFunds());
@@ -24,8 +30,10 @@ public class StockController {
         return "main";
     }
 
-    @PostMapping("/search") // TODO, rename HTML param to symbol rather than stockName
+    @PostMapping("/search")
     public String searchStock(@RequestParam("symbol") String symbol, Model model){
+        if(userService.getLogged() == null) return "login";
+
         StockUnit stockUnit = null;
         double stockPrice = 0.0;
         try{
@@ -56,11 +64,13 @@ public class StockController {
                            @RequestParam("buyShares") int buyShares,
                            Model model){
         // TODO, write method body
+        if(userService.getLogged() == null) return "login";
         return null;
     }
 
     @PostMapping("/sell/{index}")
     public String sellStock(@PathVariable("index") int index, Model model){
+        if(userService.getLogged() == null) return "login";
         if(stockService.getHeldStocks().size() > index && index >= 0){
             stockService.sellStock(index);
         }
@@ -74,18 +84,21 @@ public class StockController {
 
     @PostMapping("/sortShares")
     public String sortShares(){
+        if(userService.getLogged() == null) return "login";
         stockService.sort();
         return "redirect:/main";
     }
 
     @PostMapping("/sortHighestValue")
     public String sortHighestValue() {
+        if(userService.getLogged() == null) return "login";
         stockService.sortByHighest();
         return "redirect:/main";
     }
 
     @PostMapping("/sortLowestValue")
     public String sortLowestValue(){
+        if(userService.getLogged() == null) return "login";
         stockService.sortByLowest();
         return "redirect:/main";
     }

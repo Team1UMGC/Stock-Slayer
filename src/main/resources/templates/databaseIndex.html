@@ -20,11 +20,11 @@
 
         <tbody>
             <tr th:each="user:${userList}">
-                <td th:text="${user.getID()}"></td>
+                <td th:text="${user.getId()}"></td>
                 <td th:text="${user.getEmail()}"></td>
                 <td th:text="${user.getPassword()}"></td>
                 <td th:text="${user.getIsLocked()}"></td>
-                <td><a th:href="@{'/database/delete/' + ${user.getEmail()}}">Delete</a></td>
+                <td><a th:href="@{'/database/delete/user/' + ${user.getId()}}">Delete</a></td>
             </tr>
         </tbody>
     </table>
@@ -50,13 +50,15 @@
                 <td th:text="${stock.getSymbol()}"></td>
                 <td th:text="${stock.getVolume()}"></td>
                 <th th:text="${stock.getValue()}"></th>
-                <td><a th:href="@{'/database/delete/' + ${stock.getId()}}">Delete</a></td>
+                <td><a th:href="@{'/database/delete/stock/' + ${stock.getId()}}">Delete</a></td>
             </tr>
         </tbody>
     </table>
 
+    <br/>
+
     <h1>Add User Entry</h1>
-    <form method="POST" action="/database/add/">
+    <form method="POST" action="/database/add/user">
         <div id="user-input-area">
             <input id="add-email"
                    name="email"
@@ -71,6 +73,38 @@
         </div>
         <br/>
         <input type="submit" value="Add User"/>
+    </form>
+
+    <br/>
+
+    <h1>Add Stock Entry</h1>
+    <form method="POST" action="/database/add/stock">
+        <div id="stock-input-area">
+            <input id="add-stock-ownerId"
+                   name="ownerId"
+                   placeholder="Enter Owner ID"
+                   required type="number"
+            />
+            <input id="add-stock-symbol"
+                   name="symbol"
+                   placeholder="Enter Stock Symbol"
+                   required type="text"
+            />
+            <input id="add-stock-volume"
+                   name="volume"
+                   placeholder="Enter Volume"
+                   required type="number"
+                   step="0.1"
+            />
+            <input id="add-stock-value"
+                   name="value"
+                   placeholder="Enter Value"
+                   required type="number"
+                   step="0.1"
+            />
+        </div>
+        <br/>
+        <input type="submit" value="Add Stock">
     </form>
 
 <!--    <h1>Update User Entry</h1>-->

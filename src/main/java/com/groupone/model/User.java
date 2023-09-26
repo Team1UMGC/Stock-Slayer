@@ -1,15 +1,17 @@
-package com.groupone;
+package com.groupone.model;
 
 import java.util.ArrayList;
 
 /**
  * Abstracts and stores information about a user such as ID, email, password, and owned stocks
  */
+
 public class User {
-	int id;													// User ID, this must be unique to each user object
-	String email;											// String containing the email of the registered user
-	String password;										// String of the password of the user. Should be encrypted, eventually...
-	ArrayList<Stock> ownedStocks = new ArrayList<Stock>();	// ArrayList of Stock objects, where each Stock object contains information about an owned stock
+	public int id;													// User ID, this must be unique to each user object
+	public String email;											// String containing the email of the registered user
+	public String password;											// String of the password of the user. Should be encrypted, eventually...
+	public Boolean isLocked = false;								// Used to lock account and deny login.
+	public ArrayList<Stock> ownedStocks = new ArrayList<Stock>();	// ArrayList of Stock objects, where each Stock object contains information about an owned stock
 	
 	/**
 	 * Creates empty object instance
@@ -19,13 +21,26 @@ public class User {
 		this.email = "";
 		this.password = "";
 	}
-	
+
+	public User(int id, String email, String password) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+	}
+
+	public User(int id, String email, String password, Boolean isLocked) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.isLocked = isLocked;
+	}
+
 	/**
 	 * Creates object with values email and password initialized
 	 * @param email String of the registered user's email
 	 * @param password String of the registered user's password
 	 */
-	User(String email, String password){
+	public User(String email, String password){
 		this.email = email;
 		this.password = password;
 	}
@@ -175,5 +190,27 @@ public class User {
 	 */
 	public void setStocks(ArrayList<Stock> stocks) {
 		this.ownedStocks = stocks;
+	}
+
+	public Boolean getIsLocked() {
+		return isLocked;
+	}
+
+	public void setIsLocked(Boolean locked) {
+		isLocked = locked;
+	}
+
+	public void toggleLock(){
+        this.isLocked = !this.isLocked;
+	}
+
+	@Override
+	public String toString() {
+		return "User{" +
+				"id=" + id +
+				", email='" + email + '\'' +
+				", password='" + password + '\'' +
+				", ownedStocks=" + ownedStocks.toString() +
+				'}';
 	}
 }

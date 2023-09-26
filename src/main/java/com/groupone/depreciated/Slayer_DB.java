@@ -1,8 +1,10 @@
-package com.groupone;
+package com.groupone.depreciated;
 
 import java.sql.*;
 import java.util.ArrayList;
-import com.groupone.*;
+
+import com.groupone.model.Stock;
+import com.groupone.model.User;
 
 public class Slayer_DB {
     private static String dbConnectionPath = "jdbc:sqlite:slayer.db";

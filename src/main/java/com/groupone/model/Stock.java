@@ -1,4 +1,4 @@
-package com.groupone;
+package com.groupone.model;
 
 
 /**
@@ -106,5 +106,16 @@ public class Stock {
 	 */
 	public double getValue() {
 		return this.value;
+	}
+
+	@Override
+	public String toString() {
+		return "Stock{" +
+				"stockID=" + stockID +
+				", ownerID=" + ownerID +
+				", symbol='" + symbol + '\'' +
+				", volume=" + volume +
+				", value=" + value +
+				'}';
 	}
 }

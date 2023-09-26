@@ -1,6 +1,6 @@
 package com.groupone.controller;
 
-import com.groupone.dao.DatabaseAPI;
+import com.groupone.api.DatabaseAPI;
 import com.groupone.model.User;
 import com.groupone.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,19 @@ public class DatabaseController {
     @RequestMapping("/database")
     public String databaseIndex(Model model){
         model.addAttribute("userList", databaseService.getUserTableInfo());
+        model.addAttribute("stockList", databaseService.getStockTableInfo());
         return "databaseIndex";
     }
 
     @RequestMapping("/database/delete/{useremail}")
     public RedirectView deleteUser(@PathVariable String useremail){
-        databaseAPI.deleteUserRecord(useremail);
+        databaseAPI.deleteUserRecord(useremail); //TODO, if the user has stocks, they should be deleted too
+        return defaultRedirection;
+    }
+
+    @RequestMapping("/database/delete/{stockId}")
+    public RedirectView deleteStock(@PathVariable int stockId){
+        databaseAPI.deleteStockRecord(stockId);
         return defaultRedirection;
     }
 

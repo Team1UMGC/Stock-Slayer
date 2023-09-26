@@ -1,5 +1,6 @@
 package com.groupone;
 
+import com.groupone.api.DatabaseAPI;
 import com.groupone.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,34 +26,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StockSlayerApplication extends SpringBootServletInitializer implements CommandLineRunner {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    DatabaseAPI databaseAPI;
 
     public static void main(String[] args) {
         SpringApplication.run(StockSlayerApplication.class, args);
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS user(" +
-                "email STRING NOT NULL," +
-                "password STRING NOT NULL," +
-                "isLocked BOOLEAN);");
-
-//        jdbcTemplate.execute("INSERT INTO user (email, password) VALUES('demo@example.com', 'password');");
-//
-//        List<User> users = jdbcTemplate.query("SELECT * FROM user;",
-//                (resultSet, rowNum) -> new User(
-//                        rowNum,
-//                        resultSet.getString("email"),
-//                        resultSet.getString("password")
-//                ));
-//
-//        users.forEach(System.out::println);
-
-        final boolean deleteTable = false;
-        if(deleteTable){
-            jdbcTemplate.execute("DROP TABLE IF EXISTS user");
-        }
+    public void run(String... args) throws Exception { // TODO init database in databaseAPI by calling the object
+        databaseAPI.initDatabase();
     }
 
     @Override

@@ -1,17 +1,19 @@
 package com.groupone.model;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Abstracts and stores information about a user such as ID, email, password, and owned stocks
  */
 
 public class User {
-	public int id;													// User ID, this must be unique to each user object
-	public String email;											// String containing the email of the registered user
-	public String password;											// String of the password of the user. Should be encrypted, eventually...
-	public Boolean isLocked = false;								// Used to lock account and deny login.
-	public ArrayList<Stock> ownedStocks = new ArrayList<Stock>();	// ArrayList of Stock objects, where each Stock object contains information about an owned stock
+	private int id;													// User ID, this must be unique to each user object
+	private String email;											// String containing the email of the registered user
+	private String password;										// String of the password of the user. Should be encrypted, eventually...
+	private Boolean isLocked = false;								// Used to lock account and deny login.
+	private double availableFunds = 0.0;							// Funds for purchasing stock TODO: Need to add availableFunds as an entry in the user db table
+	private ArrayList<Stock> ownedStocks = new ArrayList<>();	// ArrayList of Stock objects, where each Stock object contains information about an owned stock
 	
 	/**
 	 * Creates empty object instance
@@ -74,8 +76,8 @@ public class User {
 	
 	/**
 	 * Updates a user's email and password in one method
-	 * @param email
-	 * @param password
+	 * @param email new email
+	 * @param password new password
 	 */
 	public void updateUser(String email, String password) {
 		setEmail(email);
@@ -85,12 +87,12 @@ public class User {
 	/**
 	 * Gets an array list of stock objects defined by the parameter symbol
 	 * @param symbol String, symbol of stock, such as "APPL" or "IMB"
-	 * @return Returns ArrayList<Stock> object filled with stocks of the same symbol entered in the parameters
+	 * @return Returns ArrayList<Stock> object filled with stocks of the same symbol entered the parameters
 	 */
 	public ArrayList<Stock> getStocksBySymbol(String symbol){
-		ArrayList<Stock> symbolStock = new ArrayList<Stock>();
+		ArrayList<Stock> symbolStock = new ArrayList<>();
 		this.ownedStocks.forEach(e -> {
-			if(e.symbol == symbol) symbolStock.add(e);
+			if(Objects.equals(e.symbol, symbol)) symbolStock.add(e);
 		});
 		return symbolStock;
 	}
@@ -104,7 +106,7 @@ public class User {
 		int removalIndex = 0;
 		for(int i = 0; i < ownedStocks.size(); i++) {
 			Stock stock = ownedStocks.get(i);
-			if(stock.getStockID() == stockID) {
+			if(stock.getId() == stockID) {
 				stockFound = true;
 				removalIndex = i;
 				break;
@@ -112,20 +114,6 @@ public class User {
 		}
 		
 		if(stockFound) ownedStocks.remove(removalIndex);
-	}
-	
-	/**
-	 * Prints out all kept data about the user and the stocks owned
-	 */
-	public void printData() {
-		System.out.println("id : " + this.id);
-		System.out.println("email : " + this.email);
-		System.out.println("password : " + this.password);
-		System.out.println("num of stocks : " + this.ownedStocks.size());
-		ownedStocks.forEach(e->{
-			System.out.println();
-			e.printStockData();
-			});
 	}
 	
 	/**
@@ -204,13 +192,31 @@ public class User {
         this.isLocked = !this.isLocked;
 	}
 
+	public double getAvailableFunds() {
+		return availableFunds;
+	}
+
+	public void setAvailableFunds(double availableFunds) {
+		this.availableFunds = availableFunds;
+	}
+
+	public void addFunds(double value){
+		this.availableFunds += value;
+	}
+
+	public void subtractFunds(double value){
+		this.availableFunds -= value;
+	}
+
 	@Override
 	public String toString() {
 		return "User{" +
 				"id=" + id +
 				", email='" + email + '\'' +
 				", password='" + password + '\'' +
-				", ownedStocks=" + ownedStocks.toString() +
+				", isLocked=" + isLocked +
+				", availableFunds=" + availableFunds +
+				", ownedStocks=" + ownedStocks +
 				'}';
 	}
 }

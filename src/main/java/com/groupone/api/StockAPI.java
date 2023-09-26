@@ -1,4 +1,4 @@
-package com.groupone.dao;
+package com.groupone.api;
 
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.Config;
@@ -7,11 +7,12 @@ import com.crazzyghost.alphavantage.parameters.OutputSize;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-@Component
+@Controller
 public class StockAPI {
     private final Config API_CONFIG;
 
@@ -62,6 +63,21 @@ public class StockAPI {
                 .fetchSync()
                 .getStockUnits()
                 .subList(0, 9);
+    }
+
+    public HashMap<String, List<StockUnit>> getMultipleIntraDayStockUnits(List<String> symbols){
+        HashMap<String, List<StockUnit>> stockUnitMap = new HashMap<>();
+
+        symbols.forEach(symbol -> {
+            try{
+                List<StockUnit> stockUnits = getIntraDayResponse(Interval.DAILY, OutputSize.COMPACT, symbol).getStockUnits();
+                stockUnitMap.put(symbol, stockUnits);
+            }catch(Exception e){
+                System.err.println(e.getMessage());
+            }
+        });
+
+        return stockUnitMap;
     }
 
 }

@@ -1,16 +1,38 @@
 package com.groupone.service;
 
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
-import com.groupone.dao.StockAPI;
+import com.groupone.api.DatabaseAPI;
+import com.groupone.api.StockAPI;
 import com.groupone.model.Stock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+@Service
 public class StockService {
     @Autowired
     StockAPI stockAPI;
+
+    @Autowired
+    DatabaseAPI databaseAPI;
+
+//    private final boolean demoMode = true;
+
+//    private final HashMap<String, List<StockUnit>> demoStocks = stockAPI.getMultipleIntraDayStockUnits( TODO Fix nullPointerException Error when calling method
+//            List.of("GOOGL", "TSLA", "AMZN"));
+
+//    private boolean isHeld(String symbol){
+//        List<StockUnit> stockUnits = demoStocks.get(symbol);
+//        return stockUnits != null;
+//    }
+
+
     public List<Stock> getHeldStocks() {
         //TODO write method body
         return null;

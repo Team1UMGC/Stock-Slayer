@@ -1,6 +1,8 @@
 package com.groupone.controller;
 
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
+import com.groupone.model.Stock;
+import com.groupone.model.User;
 import com.groupone.service.StockService;
 import com.groupone.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Map;
 
 @Controller
 public class StockController {
@@ -21,29 +25,29 @@ public class StockController {
 
     @GetMapping("/main")
     public String mainPage(Model model){
-        if(userService.getLogged() == null) return "login";
+        User user = userService.getLogged();
+        if(user == null) return "login";
 
-        model.addAttribute("heldStocks", stockService.getHeldStocks());
-        model.addAttribute("stockPrices", stockService.getStockPrices());
-        model.addAttribute("userFunds", stockService.getUserFunds());
+        model.addAttribute("heldStocks", stockService.getHeldStocks(user));
+        model.addAttribute("stockPrices", stockService.getStockPrices(user));
+        model.addAttribute("userFunds", stockService.getUserFunds(user));
 
         return "main";
     }
 
     @PostMapping("/search")
     public String searchStock(@RequestParam("symbol") String symbol, Model model){
-        if(userService.getLogged() == null) return "login";
+        User user = userService.getLogged();
+        if(user == null) return "login";
 
-        StockUnit stockUnit = null;
         double stockPrice = 0.0;
         try{
-            stockUnit = stockService.requestStock(symbol);
+            stockPrice = stockService.requestStockPrice(symbol);
         }catch (Exception e){
             System.err.println(e.getMessage());
         }
 
-        if(stockUnit != null){
-            stockPrice = stockUnit.getClose();
+        if(stockPrice != 0.0){
             model.addAttribute("symbol", symbol);
             model.addAttribute("stockPrice", stockPrice);
         } else {
@@ -51,54 +55,68 @@ public class StockController {
             model.addAttribute("stockPrice", "N/A");
         }
 
-        model.addAttribute("heldStocks", stockService.getHeldStocks());
-        model.addAttribute("stockPrices", stockService.getStockPrices());
-        model.addAttribute("userFunds", stockService.getUserFunds());
+        model.addAttribute("heldStocks", stockService.getHeldStocks(user));
+        model.addAttribute("stockPrices", stockService.getStockPrices(user));
+        model.addAttribute("userFunds", stockService.getUserFunds(user));
 
         return "main";
     }
 
     @PostMapping("/buy")
     public String buyStock(@RequestParam("symbol") String symbol,
-                           @RequestParam("price") double price,
-                           @RequestParam("buyShares") int buyShares,
+                           @RequestParam("price") String priceStr,
+                           @RequestParam("buyShares") String buySharesStr,
                            Model model){
-        // TODO, write method body
-        if(userService.getLogged() == null) return "login";
-        return null;
+        User user = userService.getLogged();
+        if(user == null) return "login";
+        double price = Double.parseDouble(priceStr);
+        double buyShares = Double.parseDouble(buySharesStr);
+
+        double totalCost = price * buyShares;
+        if(user.getAvailableFunds() >= totalCost && buyShares > 0){
+            user.subtractFunds(totalCost);
+            user.addStock(symbol, buyShares, price);
+            stockService.addStockToDatabase(user, new Stock(symbol, buyShares, price));
+        }
+
+        return "main";
     }
 
     @PostMapping("/sell/{index}")
     public String sellStock(@PathVariable("index") int index, Model model){
-        if(userService.getLogged() == null) return "login";
-        if(stockService.getHeldStocks().size() > index && index >= 0){
+        User user = userService.getLogged();
+        if(user == null) return "login";
+        if(stockService.getHeldStocks(user).size() > index && index >= 0){
             stockService.sellStock(index);
         }
 
-        model.addAttribute("heldStocks", stockService.getHeldStocks());
-        model.addAttribute("stockPrices", stockService.getStockPrices());
-        model.addAttribute("userFunds", stockService.getUserFunds());
+        model.addAttribute("heldStocks", stockService.getHeldStocks(user));
+        model.addAttribute("stockPrices", stockService.getStockPrices(user));
+        model.addAttribute("userFunds", stockService.getUserFunds(user));
 
         return "main";
     }
 
     @PostMapping("/sortShares")
     public String sortShares(){
-        if(userService.getLogged() == null) return "login";
+        User user = userService.getLogged();
+        if(user == null) return "login";
         stockService.sort();
         return "redirect:/main";
     }
 
     @PostMapping("/sortHighestValue")
     public String sortHighestValue() {
-        if(userService.getLogged() == null) return "login";
+        User user = userService.getLogged();
+        if(user == null) return "login";
         stockService.sortByHighest();
         return "redirect:/main";
     }
 
     @PostMapping("/sortLowestValue")
     public String sortLowestValue(){
-        if(userService.getLogged() == null) return "login";
+        User user = userService.getLogged();
+        if(user == null) return "login";
         stockService.sortByLowest();
         return "redirect:/main";
     }

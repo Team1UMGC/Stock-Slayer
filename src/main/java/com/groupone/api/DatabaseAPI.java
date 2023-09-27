@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class DatabaseAPI implements CommandLineRunner {
@@ -79,6 +80,19 @@ public class DatabaseAPI implements CommandLineRunner {
         int rows = this.jdbcTemplate.update(deleteSql, params, types);
         deleteUserStocks(userId);
         System.out.printf("Deleted User: %s%n", userId);
+    }
+
+    public User getUserRecord(User user){
+        User foundUser = null;
+        List<User> recordedUsers = pairUsersToStocks(getUserTableInfo(), getStockTableInfo());
+        for(User recordedUser : recordedUsers){
+            if(Objects.equals(recordedUser.getEmail(), user.getEmail())) {
+                foundUser = user;
+                break;
+            }
+        }
+
+        return foundUser;
     }
 
     public void updateUserRecord(User oldUser, User newUser){

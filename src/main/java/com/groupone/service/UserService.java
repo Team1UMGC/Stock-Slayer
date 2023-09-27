@@ -33,7 +33,7 @@ public class UserService {
     }
 
     public void setLogged(User loggedAs) {
-        this.loggedAs = loggedAs;
+        this.loggedAs = databaseService.getUserRecord(loggedAs);
     }
 
     private boolean match(User user, String email, String password){

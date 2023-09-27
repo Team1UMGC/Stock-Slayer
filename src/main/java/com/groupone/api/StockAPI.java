@@ -52,6 +52,14 @@ public class StockAPI {
                 .fetchSync();
     }
 
+    public double getCurrentPrice(String symbol) throws Exception{
+        TimeSeriesResponse timeSeriesResponse = getIntraDayResponse(Interval.FIFTEEN_MIN, OutputSize.COMPACT, symbol);
+        if(timeSeriesResponse.getStockUnits().isEmpty()) {
+            throw new Exception(timeSeriesResponse.getErrorMessage());
+        }
+        return timeSeriesResponse.getStockUnits().get(0).getClose();
+    }
+
     public List<StockUnit> getLastTenDays(String symbol) throws Exception {
         if (API_CONFIG == null) throw new Exception("Configuration Data not Defined!");
 

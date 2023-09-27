@@ -22,6 +22,10 @@ public class DatabaseService {
         return databaseAPI.getStockTableInfo();
     }
 
+    public User getUserRecord(User user){
+        return databaseAPI.getUserRecord(user);
+    }
+
     public void deleteUserRecord(int userId){
         databaseAPI.deleteUserRecord(userId);
     }

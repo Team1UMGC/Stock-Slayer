@@ -176,6 +176,8 @@ public class DatabaseAPI implements CommandLineRunner {
                 ));
     }
 
+    // TODO, add addAvailableFunds & subtractAvailableFunds methods
+
     @EventListener(ApplicationReadyEvent.class)
     public void printDatabaseAPIStart() {
         System.out.println("Database API Running...");

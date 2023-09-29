@@ -37,6 +37,15 @@ public class User {
 		this.isLocked = isLocked;
 	}
 
+	public User(int id, String email, String password, Boolean isLocked, double availableFunds, ArrayList<Stock> ownedStocks) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.isLocked = isLocked;
+		this.availableFunds = availableFunds;
+		this.ownedStocks = ownedStocks;
+	}
+
 	/**
 	 * Creates object with values email and password initialized
 	 * @param email String of the registered user's email

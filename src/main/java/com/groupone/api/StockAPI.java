@@ -69,22 +69,22 @@ public class StockAPI {
                 .forSymbol(symbol)
                 .fetchSync()
                 .getStockUnits()
-                .subList(0, 9);
+                .subList(0, 10);
     }
 
-    public HashMap<String, List<StockUnit>> getMultipleIntraDayStockUnits(List<String> symbols){
-        HashMap<String, List<StockUnit>> stockUnitMap = new HashMap<>();
-
-        symbols.forEach(symbol -> {
-            try{
-                List<StockUnit> stockUnits = getIntraDayResponse(Interval.DAILY, OutputSize.COMPACT, symbol).getStockUnits();
-                stockUnitMap.put(symbol, stockUnits);
-            }catch(Exception e){
-                System.err.println(e.getMessage());
-            }
-        });
-
-        return stockUnitMap;
-    }
+//    public HashMap<String, List<StockUnit>> getMultipleIntraDayStockUnits(List<String> symbols){ FIXME this method might not be possible given that we only have 5 responses in one minute as a free user...
+//        HashMap<String, List<StockUnit>> stockUnitMap = new HashMap<>();
+//
+//        symbols.forEach(symbol -> {
+//            try{
+//                List<StockUnit> stockUnits = getIntraDayResponse(Interval.FIFTEEN_MIN, OutputSize.COMPACT, symbol).getStockUnits();
+//                stockUnitMap.put(symbol, stockUnits);
+//            }catch(Exception e){
+//                System.err.println(e.getMessage());
+//            }
+//        });
+//
+//        return stockUnitMap;
+//    }
 
 }

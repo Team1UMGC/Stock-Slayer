@@ -14,6 +14,7 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Objects;
 
+// TODO impl that users cannot have the same email already registered to the database
 @Component
 public class DatabaseAPI implements CommandLineRunner {
 
@@ -71,6 +72,12 @@ public class DatabaseAPI implements CommandLineRunner {
 
         int row = this.jdbcTemplate.update(addSql, params, types);
         System.out.printf("Added User: %s%n", email);
+    }
+
+    public void addUserRecord(User user){
+        String userEmail = user.getEmail();
+        String userPassword = user.getPassword();
+        addUserRecord(userEmail, userPassword);
     }
 
     public void deleteUserRecord(int userId){
@@ -132,11 +139,17 @@ public class DatabaseAPI implements CommandLineRunner {
         System.out.printf("Added Stock to user: %s%n", ownerId);
     }
 
+    public void addStockRecord(Stock stock) throws Exception{
+        addStockRecord(stock.getOwnerId(),
+                stock.getSymbol(),
+                stock.getVolume(),
+                stock.getValue());
+    }
+
     public void deleteStockRecord(int stockId) {
         jdbcTemplate.execute(String.format("DELETE FROM stock WHERE id='%s';", stockId));
         System.out.printf("Deleted Stock w/ id: %s%n", stockId);
     }
-
 
     public List<User> getUserTableInfo(){
         String selectSql = "SELECT * FROM user";
@@ -177,6 +190,7 @@ public class DatabaseAPI implements CommandLineRunner {
     }
 
     // TODO, add addAvailableFunds & subtractAvailableFunds methods
+    // TODO, add toggleUserLocked method
 
     @EventListener(ApplicationReadyEvent.class)
     public void printDatabaseAPIStart() {

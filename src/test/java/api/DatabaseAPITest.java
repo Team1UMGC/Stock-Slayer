@@ -17,6 +17,8 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+//TODO add addAvailableFundsTest & subtractAvailableFundsTest methods
+//TODO add toggleUserLockedTest method
 @SpringBootTest(classes = {StockSlayerApplication.class})
 public class DatabaseAPITest {
 
@@ -27,6 +29,8 @@ public class DatabaseAPITest {
     private JdbcTemplate jdbcTemplate;
 
     static User user;
+    static Stock stock;
+    static File dbFile;
 
     @BeforeAll
     static void setUp(){
@@ -39,18 +43,13 @@ public class DatabaseAPITest {
                 1_000.00,
                 stocks
         );
+        dbFile = new File("slayer.db");
+        stock = stocks.get(0);
     }
 
     @Test
     @Order(1)
     void initDatabaseTest(){
-        File dbFile = new File("slayer.db");
-        boolean isDeleted = dbFile.delete();
-        if(isDeleted){
-            System.out.println("slayer.db was deleted. Calling initDatabase()...");
-        } else {
-            System.out.println("slayer.db not found or could not be deleted! Calling initDatabase()...");
-        }
         databaseAPI.initDatabase();
         assert dbFile.exists();
     }
@@ -106,21 +105,30 @@ public class DatabaseAPITest {
 
         assert stockFound : "Should have a stock with the same ownerId and symbol as was inserted";
 
-        int notValidOwnerId = 5;
+        // TODO, create code that checks what IDs that are in use, then, randomly select one not in use.
+        int notValidOwnerId = 99999;
 
         assertThrows(Exception.class, () -> {
             databaseAPI.addStockRecord(notValidOwnerId, symbol, volume, value);
-        }, "There should be no owner with an ID of 5");
+        }, "There should be no owner with an ID of " + notValidOwnerId);
     }
 
     @Test
     @Order(4)
     void pairUsersToStocksTest(){
+        databaseAPI.addUserRecord(user);
+        try{
+            databaseAPI.addStockRecord(stock);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+
         List<User> usersPaired = databaseAPI.pairUsersToStocks(queryForUsers(), queryForStocks());
 
         User userPaired = usersPaired.get(0);
         assert !userPaired.getStocks().isEmpty() : "User should now be paired with a stock object";
-        assert (userPaired.getStocks().get(0).getOwnerId() == 1) : "The paired stock should belong to the user with user ID 1";
+        // FIXME This should be done in a way that checks all users are paired, not just the first user
+        assert (userPaired.getStocks().get(0).getOwnerId() == queryForStocks().get(0).getOwnerId()) : "The paired stock should belong to the user with user ID 1";
     }
 
     @Test
@@ -157,6 +165,37 @@ public class DatabaseAPITest {
         assert isEqual : "Local test query should match with called database API method query for stocks";
     }
 
+    @Test
+    @Order(7)
+    void getUserRecordTest(){
+
+        User userRecord = databaseAPI.getUserRecord(user);
+        assertNotNull(userRecord, "The retrieved user is not expected to be null");
+        assert Objects.equals(userRecord.getEmail(), user.getEmail()) : "The retrieved user should have matching emails";
+    }
+
+    @Test
+    @Order(8)
+    void deleteStockRecordTest(){
+        List<Stock> localStocksQuery = queryForStocks();
+        for (int i = 1; i <= localStocksQuery.size(); i++) {
+            databaseAPI.deleteStockRecord(i);
+        }
+        localStocksQuery = queryForStocks();
+        assert localStocksQuery.isEmpty() : "Stock table is expected to be empty";
+    }
+
+    @Test
+    @Order(9)
+    void deleteUserRecordTest(){
+        List<User> localUserQuery = queryForUsers();
+        for (int i = 1; i <= localUserQuery.size(); i++) {
+            databaseAPI.deleteUserRecord(i);
+        }
+        localUserQuery = queryForUsers();
+        assert localUserQuery.isEmpty() : "User table is expected to be empty";
+        assert queryForStocks().isEmpty() : "Stock table is expected to be empty";
+    }
 
     private List<User> queryForUsers(){
         List<User> users = jdbcTemplate.query("SELECT * FROM user;",

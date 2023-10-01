@@ -13,7 +13,7 @@ public class User {
 	private String password;										// String of the password of the user. Should be encrypted, eventually...
 	private Boolean isLocked = false;								// Used to lock account and deny login.
 	private double availableFunds = 0.0;							// Funds for purchasing stock
-	private ArrayList<Stock> ownedStocks = new ArrayList<>();	// ArrayList of Stock objects, where each Stock object contains information about an owned stock
+	private ArrayList<Stock> ownedStocks = new ArrayList<>();		// ArrayList of Stock objects, where each Stock object contains information about an owned stock
 	
 	/**
 	 * Creates empty object instance
@@ -24,12 +24,25 @@ public class User {
 		this.password = "";
 	}
 
+	/**
+	 * Creates instance of User object with id, email, and password
+	 * @param id User ID, this must be unique to each user object
+	 * @param email String containing the email of the registered user
+	 * @param password String password of the user
+	 */
 	public User(int id, String email, String password) {
 		this.id = id;
 		this.email = email;
 		this.password = password;
 	}
 
+	/**
+	 * Creates instance of User object with id, email, password, and isLocked
+	 * @param id User ID, this must be unique to each user object
+	 * @param email String containing the email of the registered user
+	 * @param password String password of the user
+	 * @param isLocked Boolean, Used to lock account and deny login
+	 */
 	public User(int id, String email, String password, Boolean isLocked) {
 		this.id = id;
 		this.email = email;
@@ -37,6 +50,14 @@ public class User {
 		this.isLocked = isLocked;
 	}
 
+	/**
+	 * Creates instance of User object with id, email, password, isLocked, availableFunds
+	 * @param id User ID, this must be unique to each user object
+	 * @param email String containing the email of the registered user
+	 * @param password String password of the user
+	 * @param isLocked boolean, Used to lock account and deny login
+	 * @param availableFunds double, funds for purchasing stock
+	 */
 	public User(int id, String email, String password, Boolean isLocked, double availableFunds) {
 		this.id = id;
 		this.email = email;
@@ -45,6 +66,15 @@ public class User {
 		this.availableFunds = availableFunds;
 	}
 
+	/**
+	 * Creates instance of User object with id, email, password, isLocked, availableFunds, ownedStocks
+	 * @param id User ID, this must be unique to each user object
+	 * @param email String containing the email of the registered user
+	 * @param password String password of the user
+	 * @param isLocked boolean, Used to lock account and deny login
+	 * @param availableFunds double, funds for purchasing stock
+	 * @param ownedStocks ArrayList of Stock objects, where each Stock object contains information about an owned stock
+	 */
 	public User(int id, String email, String password, Boolean isLocked, double availableFunds, ArrayList<Stock> ownedStocks) {
 		this.id = id;
 		this.email = email;
@@ -197,34 +227,65 @@ public class User {
 		this.ownedStocks = stocks;
 	}
 
-	public Boolean getIsLocked() {
+	/**
+	 * Returns a boolean that indicates if the user's account is
+	 * @return boolean, Used to lock account and deny login
+	 */
+	public boolean getIsLocked() {
 		return isLocked;
 	}
 
-	public void setIsLocked(Boolean locked) {
+	/**
+	 * Sets the locked status of a user's account
+	 * @param locked boolean, sets the locked status to the input value
+	 */
+	public void setIsLocked(boolean locked) {
 		isLocked = locked;
 	}
 
+	/**
+	 * Toggles the isLocked field between true and false
+	 */
 	public void toggleLock(){
         this.setIsLocked(!getIsLocked());
 	}
 
+	/**
+	 * Returns the double value of what funds the user has to spend
+	 * @return double, funds for purchasing stock
+	 */
 	public double getAvailableFunds() {
 		return this.availableFunds;
 	}
 
+	/**
+	 * Sets the amount of funds available to the user for purchasing stocks
+	 * @param availableFunds double, this value passed is set to the availableFunds field
+	 */
 	public void setAvailableFunds(double availableFunds) {
 		this.availableFunds = availableFunds;
 	}
 
+	/**
+	 * Adds the passed value to the availableFunds field of a User object
+	 * @param value The value that will be added to the availableFunds
+	 */
 	public void addFunds(double value){
 		this.availableFunds += value;
 	}
 
+	/**
+	 * Subtracts the passed value to the availableFunds field of a User Object
+	 * @param value The value that will be subtracted to the availableFunds
+	 */
 	public void subtractFunds(double value){
 		this.availableFunds -= value;
 	}
 
+	/**
+	 * returns a string that contains information about the referenced user object
+	 * @return String, info about the user object
+	 */
 	@Override
 	public String toString() {
 		return "User{" +

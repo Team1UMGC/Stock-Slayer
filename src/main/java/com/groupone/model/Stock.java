@@ -13,7 +13,7 @@ public class Stock {
 	double value;		// Double value, value of each share that was purchased
 	
 	/**
-	 * Creates Stock object with all data filled out
+	 * Creates Stock object with ALL data filled out
 	 * @param id Unique ID integer given to every stock transaction
 	 * @param ownerID Unique ID integer linked to the user id, the one who purchased the stock
 	 * @param symbol String symbol of the stock, such as "IBM" or "APPL"
@@ -28,6 +28,14 @@ public class Stock {
 		this.value = value;
 	}
 
+
+	/**
+	 * Creates Stock object with
+	 * @param ownerID Unique ID integer linked to the user id, the one who purchased the stock
+	 * @param symbol String symbol of the stock, such as "IBM" or "APPL"
+	 * @param volume Double volume, or number of shares purchased
+	 * @param value Double value, value of each share that was purchased
+	 */
 	public Stock(int ownerID, String symbol, double volume, double value) {
 		this.ownerID = ownerID;
 		this.symbol = symbol;
@@ -114,6 +122,10 @@ public class Stock {
 		return this.value;
 	}
 
+	/**
+	 * Returns a sting object containing what the data is inside the object
+	 * @return String contains data about the object
+	 */
 	@Override
 	public String toString() {
 		return "Stock{" +

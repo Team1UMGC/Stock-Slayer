@@ -21,7 +21,7 @@ public class UserController {
         return "index";
     }
 
-    @GetMapping("/login")
+    @GetMapping("/login") // TODO, try to figure out a way to save what page the user was trying to access before
     public String login(){
         return "login";
     }

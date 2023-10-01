@@ -35,7 +35,11 @@ public class DatabaseService {
     }
 
     public void addUserRecord(String email, String password) {
-        databaseAPI.addUserRecord(email, password);
+        try {
+            databaseAPI.addUserRecord(email, password);
+        } catch (Exception e){
+            System.err.println(e.getMessage());
+        }
     }
 
     public void addStockRecord(int ownerId, String symbol, Double volume, Double value) {

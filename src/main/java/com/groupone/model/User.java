@@ -12,7 +12,7 @@ public class User {
 	private String email;											// String containing the email of the registered user
 	private String password;										// String of the password of the user. Should be encrypted, eventually...
 	private Boolean isLocked = false;								// Used to lock account and deny login.
-	private double availableFunds = 0.0;							// Funds for purchasing stock TODO: Need to add availableFunds as an entry in the user db table
+	private double availableFunds = 0.0;							// Funds for purchasing stock
 	private ArrayList<Stock> ownedStocks = new ArrayList<>();	// ArrayList of Stock objects, where each Stock object contains information about an owned stock
 	
 	/**
@@ -35,6 +35,23 @@ public class User {
 		this.email = email;
 		this.password = password;
 		this.isLocked = isLocked;
+	}
+
+	public User(int id, String email, String password, Boolean isLocked, double availableFunds) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.isLocked = isLocked;
+		this.availableFunds = availableFunds;
+	}
+
+	public User(int id, String email, String password, Boolean isLocked, double availableFunds, ArrayList<Stock> ownedStocks) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.isLocked = isLocked;
+		this.availableFunds = availableFunds;
+		this.ownedStocks = ownedStocks;
 	}
 
 	/**
@@ -74,7 +91,7 @@ public class User {
 		this.ownedStocks.addAll(stocks);
 	}
 	
-	/**
+	/** TODO Needs to check if the old email or password is being used to update, if so, throw an expection
 	 * Updates a user's email and password in one method
 	 * @param email new email
 	 * @param password new password
@@ -97,7 +114,7 @@ public class User {
 		return symbolStock;
 	}
 	
-	/**
+	/** TODO Should be checking if the stock belongs to the user, if not, throw an exception
 	 * Removes a stock from the kept in ownedStocks where the stockID matches that stock
 	 * @param stockID integer, stock_id that is going to be removed from the list
 	 */
@@ -189,11 +206,11 @@ public class User {
 	}
 
 	public void toggleLock(){
-        this.isLocked = !this.isLocked;
+        this.setIsLocked(!getIsLocked());
 	}
 
 	public double getAvailableFunds() {
-		return availableFunds;
+		return this.availableFunds;
 	}
 
 	public void setAvailableFunds(double availableFunds) {

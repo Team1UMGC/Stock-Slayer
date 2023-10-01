@@ -17,7 +17,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-//TODO add addAvailableFundsTest & subtractAvailableFundsTest methods
 //TODO add toggleUserLockedTest method
 @SpringBootTest(classes = {StockSlayerApplication.class})
 public class DatabaseAPITest {
@@ -40,7 +39,7 @@ public class DatabaseAPITest {
                 "test@gmail.com",
                 "p@ssw0rd",
                 false,
-                1_000.00,
+                0.0,
                 stocks
         );
         dbFile = new File("slayer.db");
@@ -55,11 +54,15 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(2)
+    @Order(2) // FIXME default user should be deleted from the database before this test
     void addUserRecordTest(){
         String email = user.getEmail();
         String password = user.getPassword();
-        databaseAPI.addUserRecord(email, password);
+        try{
+            databaseAPI.addUserRecord(email, password);
+        }catch(Exception e){
+            System.err.print(e.getMessage());
+        }
         List<User> users = queryForUsers();
 
         assert !users.isEmpty() : "user table should be populated with at least one value";
@@ -74,6 +77,10 @@ public class DatabaseAPITest {
         }
 
         assert userFound : "could not find the user that was just added to slayer.db";
+
+        assertThrows(Exception.class, () -> {
+            databaseAPI.addUserRecord(email, password);
+        }, "Expecting to throw an exception that the user is already register in the database");
 
     }
 
@@ -115,7 +122,7 @@ public class DatabaseAPITest {
 
     @Test
     @Order(4)
-    void pairUsersToStocksTest(){
+    void pairUsersToStocksTest() throws Exception{
         databaseAPI.addUserRecord(user);
         try{
             databaseAPI.addStockRecord(stock);
@@ -176,6 +183,33 @@ public class DatabaseAPITest {
 
     @Test
     @Order(8)
+    void addAvailableFundsTest() {
+        User userRecordBeforeAddition = databaseAPI.getUserRecord(user);
+        databaseAPI.addAvailableFunds(user, 20.00);
+        User userRecordAfterAddition = databaseAPI.getUserRecord(user);
+        assert userRecordAfterAddition.getAvailableFunds() > userRecordBeforeAddition.getAvailableFunds();
+    }
+
+    @Test
+    @Order(9)
+    void subtractAvailableFundsTest() {
+        User userRecordBeforeSubtraction = databaseAPI.getUserRecord(user);
+        databaseAPI.subtractAvailableFunds(user, 20.00);
+        User userRecordAfterSubtraction = databaseAPI.getUserRecord(user);
+        assert userRecordAfterSubtraction.getAvailableFunds() < userRecordBeforeSubtraction.getAvailableFunds();
+    }
+
+    @Test
+    @Order(10)
+    void toggleUserLockedTest() throws Exception{
+        User userRecordBeforeToggle = databaseAPI.getUserRecord(user);
+        databaseAPI.toggleUserLocked(user);
+        User userRecordAfterToggle = databaseAPI.getUserRecord(user);
+        assert userRecordBeforeToggle.getIsLocked() != userRecordAfterToggle.getIsLocked();
+    }
+
+    @Test
+    @Order(11)
     void deleteStockRecordTest(){
         List<Stock> localStocksQuery = queryForStocks();
         for (int i = 1; i <= localStocksQuery.size(); i++) {
@@ -186,7 +220,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(9)
+    @Order(12)
     void deleteUserRecordTest(){
         List<User> localUserQuery = queryForUsers();
         for (int i = 1; i <= localUserQuery.size(); i++) {
@@ -204,7 +238,8 @@ public class DatabaseAPITest {
                         resultSet.getInt("id"),
                         resultSet.getString("email"),
                         resultSet.getString("password"),
-                        resultSet.getBoolean("isLocked")
+                        resultSet.getBoolean("isLocked"),
+                        resultSet.getDouble("availableFunds")
                 )
         );
 
@@ -217,6 +252,17 @@ public class DatabaseAPITest {
         });
 
         return users;
+    }
+
+    private User findUser(User user) throws Exception {
+        List<User> users = queryForUsers();
+        for (User value : users) {
+            if (Objects.equals(user.getEmail(), value.getEmail())) {
+                return user;
+            }
+        }
+
+        throw new Exception("User Not Found!");
     }
 
     private List<Stock> queryForStocks(){

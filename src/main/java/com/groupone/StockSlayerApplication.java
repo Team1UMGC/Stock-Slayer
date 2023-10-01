@@ -33,7 +33,7 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
     }
 
     @Override
-    public void run(String... args) throws Exception { // TODO init database in databaseAPI by calling the object
+    public void run(String... args) {
         databaseAPI.initDatabase();
     }
 
@@ -43,16 +43,13 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
     }
 //
 //    private static final String VALID_USERNAME = "test";
-//    private static final String VALID_PASSWORD = "password"; TODO Needs to go into login controller/service
+//    private static final String VALID_PASSWORD = "password";
 //
 //    @Controller
-//    class StockController { TODO Needs to be placed in its own controller object
-//        private List<Stock> heldStocks = new ArrayList<>(); TODO should be under user, not stock
+//    class StockController {
+//        private List<Stock> heldStocks = new ArrayList<>();
 //        private Map<String, Double> stockPrices = new ConcurrentHashMap<>();
-//        private double userFunds = 10000.0; // TODO, user funds should not be under stock controller,
-//                                                     should be modelled in the user object, then called
-//                                                     in the stock service object.
-//                                                     tldr: add user funds var to user object
+//        private double userFunds = 10000.0; //
 //        private final API_Stock apiStock;
 //
 //        public StockController(API_Stock apiStock) {
@@ -62,8 +59,8 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
 //
 //        private void initializeStockPrices() {
 //            try {
-//                List<String> symbols = Arrays.asList("GOOGL", "TSLA", "AMZN"); // TODO, ANY requesting should be done in a service object
-//                for (String symbol : symbols) { // TODO, request should be sent as one request, not 3 different requests
+//                List<String> symbols = Arrays.asList("GOOGL", "TSLA", "AMZN"); //
+//                for (String symbol : symbols) { //
 //                    TimeSeriesResponse response = apiStock.getIntraDayResponse(Interval.ONE_MIN, OutputSize.COMPACT, symbol);
 //                    if (response != null && !response.getStockUnits().isEmpty()) {
 //                        StockUnit latestData = response.getStockUnits().get(0);
@@ -87,7 +84,7 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
 //
 //        @PostMapping("/search")
 //        public String searchStock(@RequestParam("stockName") String stockName, Model model) {
-//            try { TODO should in stock service layer
+//            try {
 //                TimeSeriesResponse stockInfoResponse = apiStock.getIntraDayResponse(Interval.ONE_MIN, OutputSize.COMPACT, stockName);
 //                if (stockInfoResponse != null && !stockInfoResponse.getStockUnits().isEmpty()) {
 //                    StockUnit stockUnit = stockInfoResponse.getStockUnits().get(0);
@@ -109,10 +106,10 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
 //            return "main";
 //        }
 //
-//        @PostMapping("/buy") TODO this will need calls to the database to check user funds
+//        @PostMapping("/buy")
 //        public String buyStock(@RequestParam("symbol") String symbol, @RequestParam("price") double price,
 //                               @RequestParam("buyShares") int buyShares, Model model) {
-//            if (stockPrices.containsKey(symbol)) { TODO, should be in stock service layer
+//            if (stockPrices.containsKey(symbol)) {
 //                double totalCost = price * buyShares;
 //                if (userFunds >= totalCost && buyShares > 0) {
 //                    userFunds -= totalCost;
@@ -126,7 +123,7 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
 //            return "main";
 //        }
 //
-//        @PostMapping("/sell/{index}") TODO this will need a call to the database, call for user, and stock table
+//        @PostMapping("/sell/{index}")
 //        public String sellStock(@PathVariable("index") int index, Model model) {
 //            if (index >= 0 && index < heldStocks.size()) {
 //                Stock stockToSell = heldStocks.get(index);
@@ -171,7 +168,7 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
 //    }
 //
 //    @Controller
-//    class LoginController { TODO, needs to be placed in its own login controller object
+//    class LoginController {
 //
 //        @GetMapping("/login")
 //        public String loginForm() {
@@ -184,12 +181,12 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
 //            if (username.equals(VALID_USERNAME) && password.equals(VALID_PASSWORD)) {
 //                return "redirect:/main";
 //            } else {
-//                return "login"; TODO, this should print to the console also for some feedback to the dev
+//                return "login";
 //            }
 //        }
 //    }
 //
-//    class Stock { TODO should be modelled in its own Stock object
+//    class Stock {
 //        private String symbol;
 //        private double price;
 //        private int shares;
@@ -214,7 +211,7 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
 //    }
 //
 //    @Controller
-//    class API_Stock { TODO should be in its own object, called StockAPI under dao package
+//    class API_Stock {
 //        private final Config apiConfig;
 //
 //        public API_Stock(@Value("${ALPHA_VANTAGE_API_KEY}") String apiKey) {

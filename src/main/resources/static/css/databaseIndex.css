@@ -1,4 +1,18 @@
-table, th, td {
-    border: 1px solid black;
-    border-collapse: collapse;
+body {
+    padding: 20px;
+}
+
+.table {
+    width: 100%;
+}
+
+th {
+    background: #d2d2d2;
+    text-align: center;
+
+}
+
+td {
+    text-align: center;
+    background: #d2d2d2;
 }

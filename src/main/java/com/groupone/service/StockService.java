@@ -55,12 +55,15 @@ public class StockService {
     }
 
     public void sort() {
+        // TODO, make method body
     }
 
     public void sortByHighest() {
+        // TODO, make method body
     }
 
     public void sortByLowest() {
+        // TODO, make method body
     }
 
     public void sellStock(int index) {

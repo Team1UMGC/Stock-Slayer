@@ -6,11 +6,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio</title>
+    <style>
+        body {
+    padding: 20px;
+    }
+
+    .table {
+        width: 100%;
+    }
+
+    th {
+        background: #d2d2d2;
+        text-align: center;
+
+    }
+
+    td {
+        text-align: center;
+        background: #d2d2d2;
+    }
+    </style>
 </head>
-<body>
+<body class="align">
     <h1>My Portfolio</h1>
 
-    <table>
+    <table id="stocks-information-table" class="table table-bordered" style="width: 100%">
         <thead>
             <tr>
                 <th>Symbol</th>
@@ -22,24 +42,22 @@
         </thead>
         <tbody>
             <!-- Loop through the user's portfolio stocks -->
-            <th:block th:each="stock, iterStat : ${heldStocks}">
-                <tr>
-                    <td th:text="${stock.symbol}"></td>
-                    <td th:text="${stock.price}"></td>
-                    <td th:text="${stock.shares}"></td>
-                    <td th:text="${stock.price * stock.shares}"></td>
-                    <td>
-                        <form th:action="@{'/sell/' + ${iterStat.index}}" method="post">
-                            <button type="submit">Sell</button>
-                        </form>
-                    </td>
-                </tr>
-            </th:block>
+            <tr th:each="stock:${heldStocksList}">
+                <td th:text="${stock.getSymbol()}"></td>
+                <td th:text="${stock.getValue()}"></td>
+                <td th:text="${stock.getVolume()}"></td>
+                <td th:text="${stock.getValue() * stock.getVolume()}"></td>
+<!--                    <td>-->
+<!--                        <form th:action="@{'/sell/' + ${iterStat.index}}" method="post">-->
+<!--                            <button type="submit">Sell</button>-->
+<!--                        </form>-->
+<!--                    </td>-->
+            </tr>
         </tbody>
     </table>
 
     <p>Total Funds: <span th:text="${userFunds}"></span></p>
 
-    <a href="/main">Back to Main</a>
+    <a href="/">Back to Slayer Index</a>
 </body>
 </html>

@@ -14,7 +14,6 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Objects;
 
-// TODO impl that users cannot have the same email already registered to the database
 @Component
 public class DatabaseAPI implements CommandLineRunner {
 
@@ -44,7 +43,9 @@ public class DatabaseAPI implements CommandLineRunner {
                 (resultSet, rowNum) -> new User(
                         resultSet.getInt("id"),
                         resultSet.getString("email"),
-                        resultSet.getString("password")
+                        resultSet.getString("password"),
+                        resultSet.getBoolean("isLocked"),
+                        resultSet.getDouble("availableFunds")
                 ));
 
         List<Stock> stocks = jdbcTemplate.query("SELECT * FROM stock;",
@@ -65,7 +66,9 @@ public class DatabaseAPI implements CommandLineRunner {
         }
     }
 
-    public void addUserRecord(String email, String password){
+    public void addUserRecord(String email, String password) throws Exception{
+        if(getUserRecord(new User(email, password)) != null) throw new Exception("User already in database");
+
         final String addSql = "INSERT INTO user (email, password) VALUES (?, ?)";
         Object[] params = {email, password};
         int[] types = {Types.VARCHAR, Types.VARCHAR};
@@ -74,7 +77,7 @@ public class DatabaseAPI implements CommandLineRunner {
         System.out.printf("Added User: %s%n", email);
     }
 
-    public void addUserRecord(User user){
+    public void addUserRecord(User user) throws Exception{
         String userEmail = user.getEmail();
         String userPassword = user.getPassword();
         addUserRecord(userEmail, userPassword);
@@ -91,10 +94,10 @@ public class DatabaseAPI implements CommandLineRunner {
 
     public User getUserRecord(User user){
         User foundUser = null;
-        List<User> recordedUsers = pairUsersToStocks(getUserTableInfo(), getStockTableInfo());
+        List<User> recordedUsers = getUserTableInfo();
         for(User recordedUser : recordedUsers){
             if(Objects.equals(recordedUser.getEmail(), user.getEmail())) {
-                foundUser = user;
+                foundUser = recordedUser;
                 break;
             }
         }
@@ -161,6 +164,30 @@ public class DatabaseAPI implements CommandLineRunner {
         return queryForStocks(selectSql);
     }
 
+    public void addAvailableFunds(User user, double funds){
+        User userRecord = getUserRecord(user);
+        userRecord.addFunds(funds);
+        jdbcTemplate.execute(String.format("UPDATE user SET availableFunds=%1$f WHERE id=%2$s;",
+                userRecord.getAvailableFunds(), userRecord.getId()));
+        System.out.printf("Set availableFunds %1$s to user %2$s", userRecord.getAvailableFunds(), user.getEmail());
+    }
+
+    public void subtractAvailableFunds(User user, double funds){
+        User userRecord = getUserRecord(user);
+        userRecord.subtractFunds(funds);
+        jdbcTemplate.execute(String.format("UPDATE user SET availableFunds=%1$f WHERE id=%2$s;",
+                userRecord.getAvailableFunds(), userRecord.getId()));
+        System.out.printf("Set availableFunds %1$s to user %2$s", userRecord.getAvailableFunds(), user.getEmail());
+    }
+
+    public void toggleUserLocked(User user){
+        User userRecord = getUserRecord(user);
+        userRecord.toggleLock();
+        jdbcTemplate.execute(String.format("UPDATE user SET isLocked=%1$s WHERE id='%2$s'",
+                userRecord.getIsLocked(), userRecord.getId()));
+        System.out.printf("isLocked set to: %1$s user account: %2$s", userRecord.getIsLocked(), userRecord.getEmail());
+    }
+
     private void deleteUserStocks(int userId){
         jdbcTemplate.execute(String.format("DELETE FROM stock WHERE ownerId='%s';", userId));
         System.out.printf("Deleted User: %s stocks%n", userId);
@@ -172,7 +199,8 @@ public class DatabaseAPI implements CommandLineRunner {
                         resultSet.getInt("id"),
                         resultSet.getString("email"),
                         resultSet.getString("password"),
-                        resultSet.getBoolean("isLocked")
+                        resultSet.getBoolean("isLocked"),
+                        resultSet.getDouble("availableFunds")
                 ));
         users = pairUsersToStocks(users, getStockTableInfo());
         return users;
@@ -188,9 +216,6 @@ public class DatabaseAPI implements CommandLineRunner {
                         resultSet.getDouble("value")
                 ));
     }
-
-    // TODO, add addAvailableFunds & subtractAvailableFunds methods
-    // TODO, add toggleUserLocked method
 
     @EventListener(ApplicationReadyEvent.class)
     public void printDatabaseAPIStart() {

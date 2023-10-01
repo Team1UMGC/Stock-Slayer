@@ -37,6 +37,14 @@ public class User {
 		this.isLocked = isLocked;
 	}
 
+	public User(int id, String email, String password, Boolean isLocked, double availableFunds) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.isLocked = isLocked;
+		this.availableFunds = availableFunds;
+	}
+
 	public User(int id, String email, String password, Boolean isLocked, double availableFunds, ArrayList<Stock> ownedStocks) {
 		this.id = id;
 		this.email = email;
@@ -106,7 +114,7 @@ public class User {
 		return symbolStock;
 	}
 	
-	/** TODO Should be double checking if the stock belongs to the user, if not, throw an exception
+	/** TODO Should be checking if the stock belongs to the user, if not, throw an exception
 	 * Removes a stock from the kept in ownedStocks where the stockID matches that stock
 	 * @param stockID integer, stock_id that is going to be removed from the list
 	 */
@@ -198,11 +206,11 @@ public class User {
 	}
 
 	public void toggleLock(){
-        this.isLocked = !this.isLocked;
+        this.setIsLocked(!getIsLocked());
 	}
 
 	public double getAvailableFunds() {
-		return availableFunds;
+		return this.availableFunds;
 	}
 
 	public void setAvailableFunds(double availableFunds) {

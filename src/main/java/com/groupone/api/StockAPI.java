@@ -15,10 +15,21 @@ import java.util.*;
 public class StockAPI {
     private final Config API_CONFIG;
 
+    /**
+     * Constructor that sets up the configuration data for the API wrapper
+     * @param apiKey String, alpha vantage API key
+     */
     public StockAPI(@Value("${ALPHA_VANTAGE_API_KEY}") String apiKey){
         API_CONFIG = Config.builder().key(apiKey).timeOut(10).build();
     }
 
+    /**
+     *
+     * @param interval
+     * @param outputSize
+     * @param symbol
+     * @throws Exception
+     */
     public void printIntraDay(Interval interval, OutputSize outputSize, String symbol) throws Exception {
         if (API_CONFIG == null) {
             throw new Exception("Configuration Data not Defined!");
@@ -37,6 +48,14 @@ public class StockAPI {
         );
     }
 
+    /**
+     *
+     * @param interval
+     * @param outputSize
+     * @param symbol
+     * @return
+     * @throws Exception
+     */
     public TimeSeriesResponse getIntraDayResponse(Interval interval, OutputSize outputSize, String symbol) throws Exception {
         if (API_CONFIG == null) {
             throw new Exception("Configuration Data not Defined!");
@@ -51,6 +70,12 @@ public class StockAPI {
                 .fetchSync();
     }
 
+    /**
+     *
+     * @param symbol
+     * @return
+     * @throws Exception
+     */
     public double getCurrentPrice(String symbol) throws Exception{
         TimeSeriesResponse timeSeriesResponse = getIntraDayResponse(Interval.FIFTEEN_MIN, OutputSize.COMPACT, symbol);
         if(timeSeriesResponse.getStockUnits().isEmpty()) {
@@ -59,6 +84,12 @@ public class StockAPI {
         return timeSeriesResponse.getStockUnits().get(0).getClose();
     }
 
+    /**
+     *
+     * @param symbol
+     * @return
+     * @throws Exception
+     */
     public List<StockUnit> getLastTenDays(String symbol) throws Exception {
         if (API_CONFIG == null) throw new Exception("Configuration Data not Defined!");
 

@@ -16,6 +16,12 @@ public class PortfolioController {
     @Autowired
     UserService userService;
 
+    /**
+     * Get Mapping for the portfolio page
+     * @param model Model, DOM that will have attributes added to it
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to portfolio to load the information
+     */
     @GetMapping("/portfolio")
     public String portfolio(Model model){
         User user = userService.getLogged();

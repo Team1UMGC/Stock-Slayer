@@ -23,6 +23,12 @@ public class StockController {
     @Autowired
     UserService userService;
 
+    /**
+     * Main page that will be used for buying and selling stocks
+     * @param model Model, DOM that will have attributes added to it
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to main to load the information
+     */
     @GetMapping("/main")
     public String mainPage(Model model){
         User user = userService.getLogged();
@@ -35,6 +41,14 @@ public class StockController {
         return "main";
     }
 
+    /**
+     * Post mapping for the search function of the main page.
+     * Searches for an inputted stock symbol and returns the current price.
+     * @param symbol String, symbol that the API will search for
+     * @param model Model, DOM that will have attributes added to it
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to main to load the information
+     */
     @PostMapping("/search")
     public String searchStock(@RequestParam("symbol") String symbol, Model model){
         User user = userService.getLogged();
@@ -62,6 +76,15 @@ public class StockController {
         return "main";
     }
 
+    /**
+     * Post Mapping to buy selected stocks
+     * @param symbol String, symbol of the stock that is being purchased
+     * @param priceStr String, string of the price of the stock per share
+     * @param buySharesStr String, string of the number of shares to purchase
+     * @param model Model, DOM that will have attributes added to it
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to main to load the information
+     */
     @PostMapping("/buy")
     public String buyStock(@RequestParam("symbol") String symbol,
                            @RequestParam("price") String priceStr,
@@ -82,6 +105,13 @@ public class StockController {
         return "main";
     }
 
+    /**
+     * Post Mapping for selling an owned stock
+     * @param index int, Index of what stock to sell
+     * @param model Model, DOM that will have attributes added to it
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to main to load the information
+     */
     @PostMapping("/sell/{index}")
     public String sellStock(@PathVariable("index") int index, Model model){
         User user = userService.getLogged();
@@ -97,6 +127,11 @@ public class StockController {
         return "main";
     }
 
+    /**
+     *
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to main to load the information
+     */
     @PostMapping("/sortShares")
     public String sortShares(){
         User user = userService.getLogged();
@@ -105,6 +140,11 @@ public class StockController {
         return "redirect:/main";
     }
 
+    /**
+     *
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to main to load the information
+     */
     @PostMapping("/sortHighestValue")
     public String sortHighestValue() {
         User user = userService.getLogged();
@@ -113,6 +153,11 @@ public class StockController {
         return "redirect:/main";
     }
 
+    /**
+     *
+     * @return String, redirects either back to login page if the current logged user is null,
+     *         or back to main to load the information
+     */
     @PostMapping("/sortLowestValue")
     public String sortLowestValue(){
         User user = userService.getLogged();

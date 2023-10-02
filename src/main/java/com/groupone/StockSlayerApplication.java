@@ -32,6 +32,10 @@ public class StockSlayerApplication extends SpringBootServletInitializer impleme
         SpringApplication.run(StockSlayerApplication.class, args);
     }
 
+    /**
+     * Runs the database on launch
+     * @param args incoming main method arguments
+     */
     @Override
     public void run(String... args) {
         databaseAPI.initDatabase();

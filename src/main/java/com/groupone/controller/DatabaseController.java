@@ -15,8 +15,14 @@ public class DatabaseController {
     @Autowired
     DatabaseService databaseService;
 
+    // Default page to redirect to after loading
     private final RedirectView defaultRedirection = new RedirectView("/database");
 
+    /**
+     * Request Mapping for the database page
+     * @param model Model, DOM that will have attributes added to it
+     * @return String, name of the page to load, which is "databaseIndex"
+     */
     @RequestMapping("/database")
     public String databaseIndex(Model model){
         model.addAttribute("userList", databaseService.getUserTableInfo());
@@ -24,19 +30,29 @@ public class DatabaseController {
         return "databaseIndex";
     }
 
+    /**
+     * Request Mapping for deleting a user
+     * @param userId int, user ID of the user to delete from the database
+     * @return defaultRedirection
+     */
     @RequestMapping("/database/delete/user/{userId}")
     public RedirectView deleteUser(@PathVariable int userId){
         databaseService.deleteUserRecord(userId);
         return defaultRedirection;
     }
 
+    /**
+     * Request Mapping for deleting a stock
+     * @param stockId int, stock ID of the stock to delete from the database
+     * @return defaultRedirection
+     */
     @RequestMapping("/database/delete/stock/{stockId}")
     public RedirectView deleteStock(@PathVariable int stockId){
         databaseService.deleteStockRecord(stockId);
         return defaultRedirection;
     }
 
-//    @PostMapping("/database/update/")
+//    @PostMapping("/database/update/") FIXME need to fix the databaseAPI before this can be utilized...
 //    public RedirectView updateUser(@ModelAttribute User user){
 //        System.out.println(user);
 //        User foundUser = null;
@@ -49,15 +65,28 @@ public class DatabaseController {
 //        return defaultRedirection;
 //    }
 
+    /**
+     * Post Mapping for adding a user to the database
+     * @param user User, user to add to the database
+     * @return defaultRedirection
+     */
     @PostMapping("/database/add/user")
     public RedirectView addUser(@ModelAttribute User user){
         databaseService.addUserRecord(user.getEmail(), user.getPassword());
         return defaultRedirection;
     }
 
+    /**
+     * Post Mapping for adding a stock to the database
+     * @param ownerId int, the ID of the owner of the stock
+     * @param symbol String, the symbol of the stock
+     * @param volume double, the volume, or number of shares purchased
+     * @param value double, the value of each share
+     * @return defaultRedirection
+     */
     @PostMapping("database/add/stock")
     public RedirectView addStock(@RequestParam int ownerId, @RequestParam String symbol,
-                                 @RequestParam Double volume, @RequestParam Double value){
+                                 @RequestParam double volume, @RequestParam double value){
         databaseService.addStockRecord(ownerId, symbol, volume, value);
         return defaultRedirection;
     }

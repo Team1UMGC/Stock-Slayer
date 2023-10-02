@@ -22,12 +22,21 @@ public class StockService {
     @Autowired
     DatabaseAPI databaseAPI;
 
-
+    /**
+     * Gets a list of all held stocks of the passed user
+     * @param user User, finds the held stocks of that user
+     * @return List containing Stock objects all owned by that user
+     */
     public List<Stock> getHeldStocks(User user) {
         User userRecord = databaseAPI.getUserRecord(user);
         return userRecord.getStocks();
     }
 
+    /**
+     * Creates a map object with the symbol the of the owned stock as the key, and the value of the stock.
+     * @param user User, finds the held stocks and values of that user
+     * @return Map<String, Double> Returns map, String key is symbol of that stock, Double value is the value of that stock.
+     */
     public Map<String, Double> getStockPrices(User user) {
         User userRecord = databaseAPI.getUserRecord(user);
         Map<String, Double> stockPrices = new HashMap<>(); // TODO, abstract this into databaseAPI as a method
@@ -37,15 +46,30 @@ public class StockService {
         return stockPrices;
     }
 
+    /**
+     * Returns the user's available funds
+     * @param user User that is being checked to return their available funds
+     * @return double, the available funds that a passed user has
+     */
     public double getUserFunds(User user) {
-        User userRecord = databaseAPI.getUserRecord(user);
-        return user.getAvailableFunds();
+        return databaseAPI.getUserRecord(user).getAvailableFunds();
     }
 
+    /**
+     * Sends request to Alpha Vantage API to get the current price of the stock from passed symbol
+     * @param symbol String, symbol of the stock
+     * @return double, the current price of the stock passed from the param
+     * @throws Exception
+     */
     public double requestStockPrice(String symbol) throws Exception{
         return stockAPI.getCurrentPrice(symbol);
     }
 
+    /**
+     * Adds a new stock record to the database with given params of the user and stock
+     * @param user User, the user that will own this stock
+     * @param stock Stock, the information about the stock that is going to be added
+     */
     public void addStockToDatabase(User user, Stock stock){
         try{
             databaseAPI.addStockRecord(user.getId(), stock.getSymbol(), stock.getVolume(), stock.getValue());
@@ -66,6 +90,10 @@ public class StockService {
         // TODO, make method body
     }
 
+    /**
+     * TODO, needs to add funds to the user
+     * @param index
+     */
     public void sellStock(int index) {
         databaseAPI.deleteStockRecord(index);
     }

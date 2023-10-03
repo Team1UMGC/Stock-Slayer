@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This service interacts with both the databaseAPI and StockAPI in regard to stocks,
+ * and handles requests to the Alpha Vantage API. If changes to stock data or requests for stock data
+ * need to happen, this is the service object to be used.
+ */
 @Service
 public class StockService {
     @Autowired

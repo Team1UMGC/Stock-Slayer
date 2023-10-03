@@ -9,6 +9,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
+/**
+ * This service contains everything needed to indirectly interactive with the database without creating
+ * a dependency loop. All controller activity that needs to interact with the database should be done through
+ * this service.
+ */
 @Service
 public class DatabaseService {
     @Autowired

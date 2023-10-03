@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
+/**
+ * This service is used to log in, register, and authenticate logging in as well as hold what user is
+ * current logged in to the site. Any user information about a session should be here.
+ */
 @Service
 public class UserService {
 

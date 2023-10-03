@@ -33,6 +33,7 @@
                 <th>email</th>
                 <th>password</th>
                 <th>isLocked</th>
+                <th>availableFunds</th>
                 <th></th>
             </tr>
         </thead>
@@ -43,6 +44,7 @@
                 <td th:text="${user.getEmail()}"></td>
                 <td th:text="${user.getPassword()}"></td>
                 <td th:text="${user.getIsLocked()}"></td>
+                <td th:text="${user.getAvailableFunds()}"></td>
                 <td><a th:href="@{'/database/delete/user/' + ${user.getId()}}">Delete</a></td>
             </tr>
         </tbody>
@@ -123,7 +125,26 @@
             />
         </div>
         <br/>
-        <input type="submit" value="Add Stock">
+        <input type="submit" value="Add Stock"/>
+    </form>
+
+    <h1>Add Funds to User</h1>
+    <form method="POST" action="/database/addFunds/">
+        <div id="add-funds-input-area">
+            <input id="add-funds-userId"
+                   name="userId"
+                   placeholder="Enter User ID"
+                   required type="number"
+           />
+            <input id="add-funds-amount"
+                   name="funds"
+                   placeholder="Enter Amount"
+                   required type="number"
+                   step="0.01"
+           />
+        </div>
+        <br/>
+        <input type="submit" value="Add Funds"/>
     </form>
 
 <!--    <h1>Update User Entry</h1>-->

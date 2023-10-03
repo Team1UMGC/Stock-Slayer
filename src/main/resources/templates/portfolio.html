@@ -47,11 +47,7 @@
                 <td th:text="${stock.getValue()}"></td>
                 <td th:text="${stock.getVolume()}"></td>
                 <td th:text="${stock.getValue() * stock.getVolume()}"></td>
-<!--                    <td>-->
-<!--                        <form th:action="@{'/sell/' + ${iterStat.index}}" method="post">-->
-<!--                            <button type="submit">Sell</button>-->
-<!--                        </form>-->
-<!--                    </td>-->
+                <td><a th:href="@{'/portfolio/sell/' + ${stock.getId()}}">Sell</a></td>
             </tr>
         </tbody>
     </table>

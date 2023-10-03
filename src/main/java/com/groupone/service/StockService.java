@@ -55,6 +55,10 @@ public class StockService {
         return databaseAPI.getUserRecord(user).getAvailableFunds();
     }
 
+    public void subtractUserFunds(User user, double value){
+        databaseAPI.subtractAvailableFunds(user, value);
+    }
+
     /**
      * Sends request to Alpha Vantage API to get the current price of the stock from passed symbol
      * @param symbol String, symbol of the stock
@@ -78,6 +82,29 @@ public class StockService {
         }
     }
 
+    public void purchaseStock(User user, Stock stock) throws Exception{
+        double totalCost = stock.getValue() * stock.getVolume();
+        if(getUserFunds(user) < totalCost) throw new Exception("Total cost to purchase stock is greater than user's available funds");
+        if(stock.getVolume() <= 0) throw new Exception("Inputted volume is less than or equal to zero");
+
+        user.subtractFunds(totalCost);
+        user.addStock(stock.getSymbol(), stock.getVolume(), stock.getValue());
+        addStockToDatabase(user, new Stock(stock.getSymbol(), stock.getValue(), stock.getVolume()));
+        subtractUserFunds(user, totalCost);
+    }
+
+    public void sellStock(User user, int stockId) {
+        Stock stock = null;
+        try{
+            stock = databaseAPI.getStockRecord(stockId);
+            databaseAPI.addAvailableFunds(user, stock.getValue()*stock.getVolume());
+            databaseAPI.deleteStockRecord(stockId);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+
+    }
+
     public void sort() {
         // TODO, make method body
     }
@@ -94,7 +121,5 @@ public class StockService {
      * TODO, needs to add funds to the user
      * @param index
      */
-    public void sellStock(int index) {
-        databaseAPI.deleteStockRecord(index);
-    }
+
 }

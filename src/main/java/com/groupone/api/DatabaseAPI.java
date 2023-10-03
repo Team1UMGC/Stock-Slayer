@@ -129,6 +129,20 @@ public class DatabaseAPI implements CommandLineRunner {
         return foundUser;
     }
 
+    public User getUserRecord(int userId) throws Exception {
+        List<User> users = jdbcTemplate.query("SELECT * FROM user WHERE id="+userId,
+                (resultSet, rowNum) -> new User(
+                        resultSet.getInt("id"),
+                        resultSet.getString("email"),
+                        resultSet.getString("password"),
+                        resultSet.getBoolean("isLocked"),
+                        resultSet.getDouble("availableFunds")
+                )
+        );
+        if(users.isEmpty()) throw new Exception("User not found!");
+        return users.get(0);
+    }
+
     /**
      * FIXME sql syntax needs to allow for updating, currently incorrect syntax
      * @param oldUser Old user information that is going to be replaced
@@ -204,6 +218,21 @@ public class DatabaseAPI implements CommandLineRunner {
     public void deleteStockRecord(int stockId) {
         jdbcTemplate.execute(String.format("DELETE FROM stock WHERE id='%s';", stockId));
         System.out.printf("Deleted Stock w/ id: %s%n", stockId);
+    }
+
+    public Stock getStockRecord(int stockId) throws Exception{
+        List<Stock> stocks = jdbcTemplate.query("SELECT * FROM stock WHERE id=" + stockId,
+            (resultSet, rowNum) -> new Stock(
+                resultSet.getInt("id"),
+                resultSet.getInt("ownerId"),
+                resultSet.getString("symbol"),
+                resultSet.getDouble("volume"),
+                resultSet.getDouble("value")
+            ));
+
+        if(stocks.isEmpty()) throw new Exception("No stock with given ID was found!");
+
+        return stocks.get(0);
     }
 
     /**

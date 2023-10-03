@@ -82,4 +82,8 @@ public class DatabaseService {
             System.err.println(e.getMessage());
         }
     }
+
+    public void addFunds(int userId, double funds) throws Exception {
+        databaseAPI.addAvailableFunds(databaseAPI.getUserRecord(userId), funds);
+    }
 }

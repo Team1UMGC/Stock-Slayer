@@ -90,4 +90,14 @@ public class DatabaseController {
         databaseService.addStockRecord(ownerId, symbol, volume, value);
         return defaultRedirection;
     }
+
+    @PostMapping("/database/addFunds/")
+    public RedirectView addFundsToUser(@RequestParam int userId, @RequestParam double funds){
+        try{
+            databaseService.addFunds(userId, funds);
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+        return defaultRedirection;
+    }
 }

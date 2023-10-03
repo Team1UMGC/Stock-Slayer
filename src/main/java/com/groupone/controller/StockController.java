@@ -92,14 +92,14 @@ public class StockController {
                            Model model){
         User user = userService.getLogged();
         if(user == null) return "login";
-        double price = Double.parseDouble(priceStr);
-        double buyShares = Double.parseDouble(buySharesStr);
 
-        double totalCost = price * buyShares;
-        if(user.getAvailableFunds() >= totalCost && buyShares > 0){
-            user.subtractFunds(totalCost);
-            user.addStock(symbol, buyShares, price);
-            stockService.addStockToDatabase(user, new Stock(symbol, buyShares, price));
+        try{
+            stockService.purchaseStock(user, new Stock(symbol,
+                Double.parseDouble(priceStr),
+                Double.parseDouble(buySharesStr)
+            ));
+        }catch (Exception e){
+            System.err.println(e.getMessage());
         }
 
         return "main";
@@ -117,7 +117,7 @@ public class StockController {
         User user = userService.getLogged();
         if(user == null) return "login";
         if(stockService.getHeldStocks(user).size() > index && index >= 0){
-            stockService.sellStock(index);
+            stockService.sellStock(user, index);
         }
 
         model.addAttribute("heldStocks", stockService.getHeldStocks(user));

@@ -2,20 +2,21 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Stock Slayer</title>
+    <title>Register - Stock Slayer</title>
 </head>
 <body>
     <div>
         <img src="../images/stock-slayer-logo.png" alt="Stock Slayer Logo" width="200">
     </div>
-    <h1>Login to Stock Slayer</h1>
-    
-    <form th:action="@{/login/authenticate}" method="post">
+    <h1>Register to Stock Slayer</h1>
+
+    <form th:action="@{/register/authenticate}" method="post">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
         <button type="submit">Login</button>
     </form>
+
 </body>
 </html>

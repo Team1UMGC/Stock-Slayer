@@ -15,7 +15,6 @@ public class UserController {
     @Autowired
     UserService userService;
 
-
     /**
      * Mapping for the index page
      * @return String, name of page that is going to be accessed, returns "index"
@@ -47,8 +46,23 @@ public class UserController {
         RedirectView direct = new RedirectView("/login");
         if(userService.authenticate(email, password)){
             userService.setLogged(new User(email, password));
-            direct = new RedirectView("/main");
+            direct = new RedirectView("/portfolio");
         }
+        return direct;
+    }
+
+    @GetMapping("/register")
+    public String register(){ return "register"; }
+
+    @PostMapping("/register/authenticate")
+    public RedirectView RegisterAuth(@RequestParam("email") String email,
+                                     @RequestParam("password") String password){
+        RedirectView direct = new RedirectView("/register");
+        if(userService.registerUser(email, password)){
+            direct = new RedirectView("/portfolio");
+            userService.setLogged(new User(email, password));
+        }
+
         return direct;
     }
 }

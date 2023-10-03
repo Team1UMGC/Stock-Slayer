@@ -33,6 +33,21 @@ public class UserService {
     }
 
     /**
+     * Registers a new user to the database, intended to be used on the register page
+     * @param email String, email that will be associated with this new account
+     * @param password String, password that will be associated with this new account
+     * @return boolean, if user has been added and found in the database successfully, return true, otherwise, false
+     */
+    public boolean registerUser(String email, String password) {
+        boolean isRegister = false;
+        databaseService.addUserRecord(email, password);
+        if(databaseService.getUserRecord(new User(email, password)) != null){
+            isRegister = true;
+        }
+        return isRegister;
+    }
+
+    /**
      * Retrieves the user that is currently logged in, returns null if no user is logged in.
      * @return
      */

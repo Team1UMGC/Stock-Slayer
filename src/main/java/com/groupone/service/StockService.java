@@ -87,6 +87,14 @@ public class StockService {
         }
     }
 
+    /**
+     * Calls to databaseAPI using helper methods to add a new stock to a user's account
+     * and subtracts funds from the user.
+     * @param user User, specified user who shall have an added stock, and subtracted funds
+     * @param stock Stock, the passed stock object that the user shall have added to their account
+     * @throws Exception Thrown if the totalCost is > what the user has in funds,
+     *                   or if the volume given is <= 0.
+     */
     public void purchaseStock(User user, Stock stock) throws Exception{
         double totalCost = stock.getValue() * stock.getVolume();
         if(getUserFunds(user) < totalCost) throw new Exception("Total cost to purchase stock is greater than user's available funds");
@@ -98,6 +106,12 @@ public class StockService {
         subtractUserFunds(user, totalCost);
     }
 
+    /**
+     * Calls to databaseAPI to sell a stock. Which involves deleting the stock from the user's account,
+     * and then adding funds to a user's account.
+     * @param user User, specified user who shall be selling the stock
+     * @param stockId int, ID of the stock that is going to be sold
+     */
     public void sellStock(User user, int stockId) {
         Stock stock = null;
         try{
@@ -121,10 +135,5 @@ public class StockService {
     public void sortByLowest() {
         // TODO, make method body
     }
-
-    /**
-     * TODO, needs to add funds to the user
-     * @param index
-     */
 
 }

@@ -88,6 +88,12 @@ public class DatabaseService {
         }
     }
 
+    /**
+     * Calls to databaseAPI and adds funds to a specified user
+     * @param userId int, id of the user that funds shall be added to
+     * @param funds double, amount of funds to be added
+     * @throws Exception Thrown if the specified user cannot be found in the database
+     */
     public void addFunds(int userId, double funds) throws Exception {
         databaseAPI.addAvailableFunds(databaseAPI.getUserRecord(userId), funds);
     }

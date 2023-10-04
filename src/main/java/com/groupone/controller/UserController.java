@@ -1,9 +1,11 @@
 package com.groupone.controller;
 
 import com.groupone.model.User;
+import com.groupone.service.StockService;
 import com.groupone.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -14,6 +16,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    StockService stockService;
 
     /**
      * Mapping for the index page
@@ -57,10 +62,10 @@ public class UserController {
     @PostMapping("/register/authenticate")
     public RedirectView RegisterAuth(@RequestParam("email") String email,
                                      @RequestParam("password") String password){
-        RedirectView direct = new RedirectView("/register");
+        RedirectView direct = new RedirectView("register");
         if(userService.registerUser(email, password)){
-            direct = new RedirectView("/portfolio");
             userService.setLogged(new User(email, password));
+            direct = new RedirectView("portfolio");
         }
 
         return direct;

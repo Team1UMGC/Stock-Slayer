@@ -30,14 +30,14 @@ public class PortfolioController {
     @GetMapping("/portfolio")
     public String portfolio(Model model){
         User user = userService.getLogged();
-        if(user == null) return "/login";
+        if(user == null) return "login";
 
         System.out.println(stockService.getHeldStocks(user));
 
         model.addAttribute("heldStocksList", stockService.getHeldStocks(user));
         model.addAttribute("userFunds", stockService.getUserFunds(user));
 
-        return "/portfolio";
+        return "portfolio";
     }
 
     @RequestMapping("/portfolio/sell/{stockId}")

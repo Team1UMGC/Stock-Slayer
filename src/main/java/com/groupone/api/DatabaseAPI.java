@@ -206,6 +206,8 @@ public class DatabaseAPI implements CommandLineRunner {
      * @param stocks List of stocks that will be paired
      * @return List of Users that have their stocks field filled out with their owned stocks from the database
      * TODO, there's gotta be a way to change this O(n^2) pairing algorithm to something better...
+     * Might be possible to integrate this pairing functionality into the record getter methods, that way, it's only
+     * grabbing the needed stocks to pair, instead of all users and all stocks...
      */
     public List<User> pairUsersToStocks(List<User> users, List<Stock> stocks){
         users.forEach(user -> {

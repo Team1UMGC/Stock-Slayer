@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.Objects;
 
 
 @Component
@@ -76,7 +77,13 @@ public class DatabaseAPI implements CommandLineRunner {
      * @throws Exception thrown when a matching email is already found in the database.
      */
     public void addUserRecord(String email, String password) throws Exception{
-        if(getUserRecord(new User(email, password).getId()) != null) throw new Exception("User already in database");
+        boolean isUserInDatabase = false;
+        try{
+            User user = getUserRecord(email);
+            isUserInDatabase = true;
+        }catch(Exception ignored){}
+
+        if(isUserInDatabase) throw new Exception("User already in database");
 
         final String addSql = "INSERT INTO user (email, password) VALUES (?, ?)";
         Object[] params = {email, password};
@@ -111,6 +118,16 @@ public class DatabaseAPI implements CommandLineRunner {
     }
 
     /**
+     * Deletes User from the database using an email as a param
+     * @param email String, email associated with the account
+     * @throws Exception Thrown if the user cannot be found by the given email
+     */
+    public void deleteUserRecord(String email) throws Exception {
+        User user = getUserRecord(email);
+        deleteUserRecord(user.getId());
+    }
+
+    /**
      * Queries for a single user record using a given user ID
      * @param userId int, the ID of the user from the user table
      * @return User, returns complete user object from the provided user ID
@@ -131,16 +148,56 @@ public class DatabaseAPI implements CommandLineRunner {
     }
 
     /**
-     * FIXME sql syntax needs to allow for updating, currently incorrect syntax
-     * @param oldUser Old user information that is going to be replaced
-     * @param newUser New user information that is going to replace the old user
+     * Queries for a single user record using a given user email
+     * @param userEmail String, the email of the suer from the user table
+     * @return User, returns complete user object from the provided user email
+     * @throws Exception Thrown if a user with the given email is not found in the database
      */
-    public void updateUserRecord(User oldUser, User newUser){
-        final String updateSql = "UPDATE user (email, password, isLocked) SET(?, ?, ?) WHERE id = ?";
-        Object[] params = {newUser.getEmail(), newUser.getPassword(), newUser.getIsLocked(), oldUser.getId()};
-        Object[] types = {Types.VARCHAR, Types.VARCHAR, Types.BOOLEAN, Types.INTEGER};
-        int rows = this.jdbcTemplate.update(updateSql, params, types);
-        System.out.printf("Updated User: %1$s %n%2$s %n", oldUser.getId(), newUser);
+    public User getUserRecord(String userEmail) throws Exception{
+        List<User> users = jdbcTemplate.query(String.format("SELECT * FROM user WHERE email='%s'", userEmail),
+            (resultSet, rowNum) -> new User(
+                resultSet.getInt("id"),
+                resultSet.getString("email"),
+                resultSet.getString("password"),
+                resultSet.getBoolean("isLocked"),
+                resultSet.getDouble("availableFunds")
+            )
+        );
+        if(users.isEmpty()) throw new Exception("User not found!");
+        return users.get(0);
+    }
+
+    /**
+     * Updates a user record using a given user id and User object to replace the entry with (replaces all fields except id)
+     * Note that if a field must remain the same, parse a User object that retains the same field value as the previous record
+     * @param userToBeUpdatedId int, the ID of the user that is going to be removed from the user table
+     * @param updatedUserInfo User, user object that will replace all details of the selected user (except for id)
+     * @throws Exception Thrown if the update of the user has failed, where user param's email does not match what has been updated in the database
+     */
+    public void updateUserRecord(int userToBeUpdatedId, User updatedUserInfo) throws Exception {
+        jdbcTemplate.execute(String.format("UPDATE user SET " +
+            "email='%1$s', " +
+            "password='%2$s', " +
+            "availableFunds='%3$f', " +
+            "isLocked='%4$b' " +
+            "WHERE id='%5$d'",
+            updatedUserInfo.getEmail(),
+            updatedUserInfo.getPassword(),
+            updatedUserInfo.getAvailableFunds(),
+            updatedUserInfo.getIsLocked(),
+            userToBeUpdatedId)
+        );
+
+        User user = new User();
+        try{
+            user = getUserRecord(updatedUserInfo.getEmail());
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+
+        if(!Objects.equals(updatedUserInfo.getEmail(), user.getEmail())) // thrown if localUserInfo != retrieved databaseUserInfo
+            throw new Exception("Attempted update of user has failed!");
+        else System.out.printf("Updated User: %1$s %n %2$s", userToBeUpdatedId, user);
     }
 
     /**

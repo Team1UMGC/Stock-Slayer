@@ -86,6 +86,34 @@ public class DatabaseAPITest {
 
     @Test
     @Order(3)
+    void updateUserRecordTest() throws Exception {
+        String emailUpdate = "testUpdate@update.com";
+        String passwordUpdate = "updatePass";
+        User oldUpdate = new User();
+        User updatedUser = new User("testUpdatedUser@updated.com", "updatedPassword");
+
+        try{
+            databaseAPI.addUserRecord(emailUpdate, passwordUpdate);
+        }catch(Exception e){ // Caught if user already in database, needs to be removed then re-added for test
+            databaseAPI.deleteUserRecord(emailUpdate);
+            databaseAPI.addUserRecord(emailUpdate, passwordUpdate);
+        }
+        oldUpdate = databaseAPI.getUserRecord(emailUpdate);
+        databaseAPI.updateUserRecord(oldUpdate.getId(), updatedUser);
+
+        assertThrows(Exception.class, () -> {
+            databaseAPI.getUserRecord(emailUpdate);
+        }, "Expected to not find the old record that was just updated");
+
+        assert Objects.equals(databaseAPI.getUserRecord(updatedUser.getEmail()).getEmail(), updatedUser.getEmail())
+                : "Expect database entry updated email to match local updated email";
+
+
+        databaseAPI.deleteUserRecord(databaseAPI.getUserRecord(updatedUser.getEmail()).getId());
+    }
+
+    @Test
+    @Order(4)
     void addStockRecordTest(){
         int ownerId = user.getStocks().get(0).getOwnerId();
         String symbol = user.getStocks().get(0).getSymbol();
@@ -121,7 +149,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void pairUsersToStocksTest() throws Exception{
         databaseAPI.addUserRecord(user);
         try{
@@ -139,7 +167,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void getUserTableInfoTest(){
         List<User> users = databaseAPI.getUserTableInfo();
         List<User> localUsersQuery = queryForUsers();
@@ -156,7 +184,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void getStockTableInfoTest(){
         List<Stock> stocks = databaseAPI.getStockTableInfo();
         List<Stock> localStocksQuery = queryForStocks();
@@ -173,7 +201,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void getUserRecordTest(){
         try{
             User userRecord = databaseAPI.getUserRecord(user.getId());
@@ -185,7 +213,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     void addAvailableFundsTest() {
         try{
             User userRecordBeforeAddition = databaseAPI.getUserRecord(user.getId());
@@ -198,7 +226,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     void subtractAvailableFundsTest() {
         try{
             User userRecordBeforeSubtraction = databaseAPI.getUserRecord(user.getId());
@@ -211,7 +239,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     void toggleUserLockedTest() throws Exception{
         try{
             User userRecordBeforeToggle = databaseAPI.getUserRecord(user.getId());
@@ -224,7 +252,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     void deleteStockRecordTest(){
         List<Stock> localStocksQuery = queryForStocks();
         for (int i = 1; i <= localStocksQuery.size(); i++) {
@@ -235,7 +263,7 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     void deleteUserRecordTest(){
         List<User> localUserQuery = queryForUsers();
         for (int i = 1; i <= localUserQuery.size(); i++) {

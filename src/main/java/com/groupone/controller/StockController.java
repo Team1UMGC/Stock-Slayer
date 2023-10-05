@@ -34,9 +34,13 @@ public class StockController {
         User user = userService.getLogged();
         if(user == null) return "login";
 
-        model.addAttribute("heldStocks", stockService.getHeldStocks(user));
-        model.addAttribute("stockPrices", stockService.getStockPrices(user));
-        model.addAttribute("userFunds", stockService.getUserFunds(user));
+        try{
+            model.addAttribute("heldStocks", stockService.getHeldStocks(user));
+            model.addAttribute("stockPrices", stockService.getStockPrices(user));
+            model.addAttribute("userFunds", stockService.getUserFunds(user));
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+        }
 
         return "main";
     }
@@ -69,9 +73,13 @@ public class StockController {
             model.addAttribute("stockPrice", "N/A");
         }
 
-        model.addAttribute("heldStocks", stockService.getHeldStocks(user));
-        model.addAttribute("stockPrices", stockService.getStockPrices(user));
-        model.addAttribute("userFunds", stockService.getUserFunds(user));
+        try{
+            model.addAttribute("heldStocks", stockService.getHeldStocks(user));
+            model.addAttribute("stockPrices", stockService.getStockPrices(user));
+            model.addAttribute("userFunds", stockService.getUserFunds(user));
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+        }
 
         return "main";
     }
@@ -116,13 +124,18 @@ public class StockController {
     public String sellStock(@PathVariable("index") int index, Model model){
         User user = userService.getLogged();
         if(user == null) return "login";
-        if(stockService.getHeldStocks(user).size() > index && index >= 0){
-            stockService.sellStock(user, index);
-        }
 
-        model.addAttribute("heldStocks", stockService.getHeldStocks(user));
-        model.addAttribute("stockPrices", stockService.getStockPrices(user));
-        model.addAttribute("userFunds", stockService.getUserFunds(user));
+        try{
+            if(stockService.getHeldStocks(user).size() > index && index >= 0){
+                stockService.sellStock(user, index);
+            }
+
+            model.addAttribute("heldStocks", stockService.getHeldStocks(user));
+            model.addAttribute("stockPrices", stockService.getStockPrices(user));
+            model.addAttribute("userFunds", stockService.getUserFunds(user));
+        }catch(Exception e){
+            System.err.println(e.getMessage());
+        }
 
         return "main";
     }

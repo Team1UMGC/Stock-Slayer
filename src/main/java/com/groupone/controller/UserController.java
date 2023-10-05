@@ -50,8 +50,12 @@ public class UserController {
                                      @RequestParam("password") String password){
         RedirectView direct = new RedirectView("/login");
         if(userService.authenticate(email, password)){
-            userService.setLogged(new User(email, password));
-            direct = new RedirectView("/portfolio");
+            try{
+                userService.setLogged(new User(email, password));
+                direct = new RedirectView("/portfolio");
+            }catch (Exception e){
+                System.err.println(e.getMessage());
+            }
         }
         return direct;
     }
@@ -63,9 +67,13 @@ public class UserController {
     public RedirectView RegisterAuth(@RequestParam("email") String email,
                                      @RequestParam("password") String password){
         RedirectView direct = new RedirectView("register");
-        if(userService.registerUser(email, password)){
-            userService.setLogged(new User(email, password));
-            direct = new RedirectView("portfolio");
+        try{
+            if(userService.registerUser(email, password)){
+                userService.setLogged(new User(email, password));
+                direct = new RedirectView("portfolio");
+            }
+        }catch(Exception e){
+            System.err.println(e.getMessage());
         }
 
         return direct;

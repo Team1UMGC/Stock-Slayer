@@ -2,7 +2,6 @@ package com.groupone.api;
 
 import com.groupone.model.Stock;
 import com.groupone.model.User;
-import com.groupone.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Types;
 import java.util.List;
-import java.util.Objects;
+
 
 @Component
 public class DatabaseAPI implements CommandLineRunner {
@@ -77,13 +76,13 @@ public class DatabaseAPI implements CommandLineRunner {
      * @throws Exception thrown when a matching email is already found in the database.
      */
     public void addUserRecord(String email, String password) throws Exception{
-        if(getUserRecord(new User(email, password)) != null) throw new Exception("User already in database");
+        if(getUserRecord(new User(email, password).getId()) != null) throw new Exception("User already in database");
 
         final String addSql = "INSERT INTO user (email, password) VALUES (?, ?)";
         Object[] params = {email, password};
         int[] types = {Types.VARCHAR, Types.VARCHAR};
 
-        int row = this.jdbcTemplate.update(addSql, params, types);
+        this.jdbcTemplate.update(addSql, params, types);
         System.out.printf("Added User: %s%n", email);
     }
 
@@ -106,29 +105,17 @@ public class DatabaseAPI implements CommandLineRunner {
         final String deleteSql = "DELETE FROM user WHERE id=?";
         Object[] params = {userId};
         int[] types = {Types.INTEGER};
-        int rows = this.jdbcTemplate.update(deleteSql, params, types);
+        this.jdbcTemplate.update(deleteSql, params, types);
         deleteUserStocks(userId);
         System.out.printf("Deleted User: %s%n", userId);
     }
 
     /**
-     * Get a single user record from the database
-     * @param user User, user that is being retrieved from the database
-     * @return returns User object from database or returns null if no user is found
+     * Queries for a single user record using a given user ID
+     * @param userId int, the ID of the user from the user table
+     * @return User, returns complete user object from the provided user ID
+     * @throws Exception Thrown if a user with the given ID is not found in the database
      */
-    public User getUserRecord(User user){ // TODO, needs to be an sql execution to find a user record for optimization
-        User foundUser = null;
-        List<User> recordedUsers = getUserTableInfo();
-        for(User recordedUser : recordedUsers){
-            if(Objects.equals(recordedUser.getEmail(), user.getEmail())) {
-                foundUser = recordedUser;
-                break;
-            }
-        }
-
-        return foundUser;
-    }
-
     public User getUserRecord(int userId) throws Exception {
         List<User> users = jdbcTemplate.query("SELECT * FROM user WHERE id="+userId,
                 (resultSet, rowNum) -> new User(
@@ -161,6 +148,7 @@ public class DatabaseAPI implements CommandLineRunner {
      * @param users List of users that will be paired
      * @param stocks List of stocks that will be paired
      * @return List of Users that have their stocks field filled out with their owned stocks from the database
+     * TODO, there's gotta be a way to change this O(n^2) pairing algorithm to something better...
      */
     public List<User> pairUsersToStocks(List<User> users, List<Stock> stocks){
         users.forEach(user -> {
@@ -180,6 +168,7 @@ public class DatabaseAPI implements CommandLineRunner {
      * @param volume double, number of shares purchased
      * @param value double, value of each share of the stock
      * @throws Exception thrown if a User does not exist that could own the stock in the database
+     * TODO authenticate via SQL query for a valid owner ID instead of going through all of the users in the database
      */
     public void addStockRecord(int ownerId, String symbol, double volume, double value) throws Exception{
         List<User> users = getUserTableInfo();
@@ -220,6 +209,12 @@ public class DatabaseAPI implements CommandLineRunner {
         System.out.printf("Deleted Stock w/ id: %s%n", stockId);
     }
 
+    /**
+     * Queries the database for a single stock and returns a single stock object
+     * @param stockId ID of the stock from the stock table
+     * @return Stock, returns a stock object from a given stock ID in the stock table
+     * @throws Exception thrown if no stock with the given stock ID was found
+     */
     public Stock getStockRecord(int stockId) throws Exception{
         List<Stock> stocks = jdbcTemplate.query("SELECT * FROM stock WHERE id=" + stockId,
             (resultSet, rowNum) -> new Stock(
@@ -240,8 +235,7 @@ public class DatabaseAPI implements CommandLineRunner {
      * @return List, list of all users in the database in the form of User objects
      */
     public List<User> getUserTableInfo(){
-        String selectSql = "SELECT * FROM user";
-        return queryForUsers(selectSql);
+        return queryForUsers();
     }
 
     /**
@@ -249,8 +243,7 @@ public class DatabaseAPI implements CommandLineRunner {
      * @return List, list of all stocks in the database in the form of Stock objects
      */
     public List<Stock> getStockTableInfo() {
-        String selectSql = "SELECT * FROM stock";
-        return queryForStocks(selectSql);
+        return queryForStocks();
     }
 
     /**
@@ -258,8 +251,8 @@ public class DatabaseAPI implements CommandLineRunner {
      * @param user User, user that will be receiving additional funds
      * @param funds double, amount to be added
      */
-    public void addAvailableFunds(User user, double funds){
-        User userRecord = getUserRecord(user);
+    public void addAvailableFunds(User user, double funds) throws Exception{
+        User userRecord = getUserRecord(user.getId());
         userRecord.addFunds(funds);
         jdbcTemplate.execute(String.format("UPDATE user SET availableFunds=%1$f WHERE id=%2$s;",
                 userRecord.getAvailableFunds(), userRecord.getId()));
@@ -271,8 +264,8 @@ public class DatabaseAPI implements CommandLineRunner {
      * @param user User, user that will be receiving subtracted funds
      * @param funds double, amount to be subtracted
      */
-    public void subtractAvailableFunds(User user, double funds){
-        User userRecord = getUserRecord(user);
+    public void subtractAvailableFunds(User user, double funds) throws Exception {
+        User userRecord = getUserRecord(user.getId());
         userRecord.subtractFunds(funds);
         jdbcTemplate.execute(String.format("UPDATE user SET availableFunds=%1$f WHERE id=%2$s;",
                 userRecord.getAvailableFunds(), userRecord.getId()));
@@ -283,8 +276,8 @@ public class DatabaseAPI implements CommandLineRunner {
      * Toggles a user's isLocked field. If locked, user cannot log in. Otherwise, user can log in.
      * @param user User to have the isLocked field toggled
      */
-    public void toggleUserLocked(User user){
-        User userRecord = getUserRecord(user);
+    public void toggleUserLocked(User user) throws Exception{
+        User userRecord = getUserRecord(user.getId());
         userRecord.toggleLock();
         jdbcTemplate.execute(String.format("UPDATE user SET isLocked=%1$s WHERE id='%2$s'",
                 userRecord.getIsLocked(), userRecord.getId()));
@@ -301,13 +294,11 @@ public class DatabaseAPI implements CommandLineRunner {
     }
 
     /**
-     *
-     * @param query
-     * @return
-     * TODO, sql query could be implemented in the method, param does not need to be passed
+     * Queries the database for all users, give a List object containing all users
+     * @return List object containing user objects that are all from the database
      */
-    private List<User> queryForUsers(String query){
-        List<User> users = jdbcTemplate.query(query,
+    private List<User> queryForUsers(){
+        List<User> users = jdbcTemplate.query("SELECT * FROM user",
             (resultSet, rowNum) -> new User(
                 resultSet.getInt("id"),
                 resultSet.getString("email"),
@@ -321,13 +312,11 @@ public class DatabaseAPI implements CommandLineRunner {
     }
 
     /**
-     *
-     * @param query
-     * @return
-     * TODO, sql query could be implemented in the method, param does not need to be passed
+     * Queries the database for all stocks, give a List object containing all stocks
+     * @return List object containing stock objects that are all from the database
      */
-    private List<Stock> queryForStocks(String query){
-        return jdbcTemplate.query(query,
+    private List<Stock> queryForStocks(){
+        return jdbcTemplate.query("SELECT * FROM stock",
             (resultSet, rowNum) -> new Stock(
                 resultSet.getInt("id"),
                 resultSet.getInt("ownerId"),
@@ -339,7 +328,7 @@ public class DatabaseAPI implements CommandLineRunner {
     }
 
     /**
-     *
+     * Prints that the database is ready when the class is running and ready to receive requests
      */
     @EventListener(ApplicationReadyEvent.class)
     public void printDatabaseAPIStart() {

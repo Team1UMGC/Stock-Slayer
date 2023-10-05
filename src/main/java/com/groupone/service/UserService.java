@@ -42,7 +42,7 @@ public class UserService {
      * @param password String, password that will be associated with this new account
      * @return boolean, if user has been added and found in the database successfully, return true, otherwise, false
      */
-    public boolean registerUser(String email, String password) {
+    public boolean registerUser(String email, String password) throws Exception {
         boolean isRegister = false;
         databaseService.addUserRecord(email, password);
         if(databaseService.getUserRecord(new User(email, password)) != null){
@@ -63,7 +63,7 @@ public class UserService {
      * Sets the user that is currently logged in
      * @param loggedAs User, returns the user object that is currently logged in
      */
-    public void setLogged(User loggedAs) {
+    public void setLogged(User loggedAs) throws Exception {
         this.loggedAs = databaseService.getUserRecord(loggedAs);
     }
 

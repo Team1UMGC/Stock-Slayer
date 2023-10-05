@@ -32,10 +32,14 @@ public class PortfolioController {
         User user = userService.getLogged();
         if(user == null) return "login";
 
-        System.out.println(stockService.getHeldStocks(user));
+        try{
+            System.out.println(stockService.getHeldStocks(user));
 
-        model.addAttribute("heldStocksList", stockService.getHeldStocks(user));
-        model.addAttribute("userFunds", stockService.getUserFunds(user));
+            model.addAttribute("heldStocksList", stockService.getHeldStocks(user));
+            model.addAttribute("userFunds", stockService.getUserFunds(user));
+        }catch(Exception e){
+            System.err.print(e.getMessage());
+        }
 
         return "portfolio";
     }

@@ -32,8 +32,8 @@ public class StockService {
      * @param user User, finds the held stocks of that user
      * @return List containing Stock objects all owned by that user
      */
-    public List<Stock> getHeldStocks(User user) {
-        User userRecord = databaseAPI.getUserRecord(user);
+    public List<Stock> getHeldStocks(User user) throws Exception {
+        User userRecord = databaseAPI.getUserRecord(user.getId());
         return userRecord.getStocks();
     }
 
@@ -42,8 +42,8 @@ public class StockService {
      * @param user User, finds the held stocks and values of that user
      * @return Map<String, Double> Returns map, String key is symbol of that stock, Double value is the value of that stock.
      */
-    public Map<String, Double> getStockPrices(User user) {
-        User userRecord = databaseAPI.getUserRecord(user);
+    public Map<String, Double> getStockPrices(User user) throws Exception {
+        User userRecord = databaseAPI.getUserRecord(user.getId());
         Map<String, Double> stockPrices = new HashMap<>(); // TODO, abstract this into databaseAPI as a method
         for (Stock recordedStock: userRecord.getStocks()) {
             stockPrices.put(recordedStock.getSymbol(), recordedStock.getValue());
@@ -56,11 +56,11 @@ public class StockService {
      * @param user User that is being checked to return their available funds
      * @return double, the available funds that a passed user has
      */
-    public double getUserFunds(User user) {
-        return databaseAPI.getUserRecord(user).getAvailableFunds();
+    public double getUserFunds(User user) throws Exception {
+        return databaseAPI.getUserRecord(user.getId()).getAvailableFunds();
     }
 
-    public void subtractUserFunds(User user, double value){
+    public void subtractUserFunds(User user, double value) throws Exception {
         databaseAPI.subtractAvailableFunds(user, value);
     }
 

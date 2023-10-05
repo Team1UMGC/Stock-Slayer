@@ -40,8 +40,8 @@ public class DatabaseService {
      * @param user User to be retrieved from the database
      * @return User object that is retrieved from the database
      */
-    public User getUserRecord(User user){
-        return databaseAPI.getUserRecord(user);
+    public User getUserRecord(User user) throws Exception {
+        return databaseAPI.getUserRecord(user.getId());
     }
 
     /**

@@ -225,20 +225,19 @@ public class DatabaseAPI implements CommandLineRunner {
      * @param volume double, number of shares purchased
      * @param value double, value of each share of the stock
      * @throws Exception thrown if a User does not exist that could own the stock in the database
-     * TODO authenticate via SQL query for a valid owner ID instead of going through all of the users in the database
      */
     public void addStockRecord(int ownerId, String symbol, double volume, double value) throws Exception{
-        List<User> users = getUserTableInfo();
-        boolean isValidOwnedId = false;
-        for (User user: users) {
-            if(user.getId() == ownerId){
-                isValidOwnedId = true;
-                break;
-            }
-        }
 
+        // Tests here if the ownerId given has a corresponding owner in the user table
+        User user = new User();
+        boolean isValidOwnedId = false;
+        try{
+            getUserRecord(ownerId);
+            isValidOwnedId = true;
+        }catch(Exception ignored){}
         if(!isValidOwnedId) throw new Exception("Not Valid Owner ID!");
 
+        // If stock will have corresponding owner, then add stock to stock table
         final String addSql = String.format("INSERT INTO stock (ownerId, symbol, volume, value) VALUES ('%1$s', '%2$s', '%3$s', '%4$s');",
                 ownerId, symbol, volume, value);
         this.jdbcTemplate.execute(addSql);

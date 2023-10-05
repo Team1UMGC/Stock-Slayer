@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -135,16 +136,19 @@ public class DatabaseAPI implements CommandLineRunner {
      */
     public User getUserRecord(int userId) throws Exception {
         List<User> users = jdbcTemplate.query("SELECT * FROM user WHERE id="+userId,
-                (resultSet, rowNum) -> new User(
-                        resultSet.getInt("id"),
-                        resultSet.getString("email"),
-                        resultSet.getString("password"),
-                        resultSet.getBoolean("isLocked"),
-                        resultSet.getDouble("availableFunds")
-                )
+            (resultSet, rowNum) -> new User(
+                resultSet.getInt("id"),
+                resultSet.getString("email"),
+                resultSet.getString("password"),
+                resultSet.getBoolean("isLocked"),
+                resultSet.getDouble("availableFunds")
+            )
         );
         if(users.isEmpty()) throw new Exception("User not found!");
-        return users.get(0);
+
+        User user = users.get(0);
+        user.setStocks(getStocksOfUser(user));
+        return user;
     }
 
     /**
@@ -164,7 +168,29 @@ public class DatabaseAPI implements CommandLineRunner {
             )
         );
         if(users.isEmpty()) throw new Exception("User not found!");
-        return users.get(0);
+
+        User user = users.get(0);
+        user.setStocks(getStocksOfUser(user));
+        return user;
+    }
+
+    /**
+     * Helper method for GetUserRecord. Used for pairing stocks to a user being attempting
+     * to be retrieved from the database as a User object.
+     * @param user User, the user who owns the stocks that is being looked for
+     * @return ArrayList object containing all the stocks a single user owns, could be empty or populated.
+     */
+    private ArrayList<Stock> getStocksOfUser(User user){
+        List<Stock> stocks = jdbcTemplate.query("SELECT * FROM stock WHERE ownerId="+user.getId(),
+            (resultSet, rowNum) -> new Stock(
+                resultSet.getInt("id"),
+                resultSet.getInt("ownerId"),
+                resultSet.getString("symbol"),
+                resultSet.getDouble("volume"),
+                resultSet.getDouble("value")
+            )
+        );
+        return new ArrayList<>(stocks);
     }
 
     /**

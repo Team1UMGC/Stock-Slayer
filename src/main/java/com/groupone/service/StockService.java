@@ -112,16 +112,19 @@ public class StockService {
      * @param user User, specified user who shall be selling the stock
      * @param stockId int, ID of the stock that is going to be sold
      */
-    public void sellStock(User user, int stockId) { // TODO, need to implement that stocks will be sold at current time price, not sold for when it was purchased.
+    public void sellStock(User user, int stockId) {
         Stock stock = null;
         try{
             stock = databaseAPI.getStockRecord(stockId);
-            databaseAPI.addAvailableFunds(user, stock.getValue()*stock.getVolume());
+            databaseAPI.addAvailableFunds(user, requestCloseValue(stock.getSymbol()));
             databaseAPI.deleteStockRecord(stockId);
         }catch (Exception e){
             System.err.println(e.getMessage());
         }
+    }
 
+    private double requestCloseValue(String symbol) throws Exception{
+        return stockAPI.getCurrentPrice(symbol);
     }
 
     public void sort() {

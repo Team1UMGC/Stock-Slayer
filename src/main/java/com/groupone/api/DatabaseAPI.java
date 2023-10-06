@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
+/**
+ * Backend Database API where all methods used to interact with the database directly are managed.
+ */
 @Component
 public class DatabaseAPI implements CommandLineRunner {
 

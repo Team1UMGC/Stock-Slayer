@@ -2,11 +2,11 @@ package api;
 
 import com.groupone.StockSlayerApplication;
 import com.groupone.api.DatabaseAPI;
+import com.groupone.exception.UserAlreadyExistsException;
+import com.groupone.exception.UserNotFoundException;
 import com.groupone.model.Stock;
 import com.groupone.model.User;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,7 +17,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-//TODO add toggleUserLockedTest method
 @SpringBootTest(classes = {StockSlayerApplication.class})
 public class DatabaseAPITest {
 
@@ -31,12 +30,15 @@ public class DatabaseAPITest {
     static Stock stock;
     static File dbFile;
 
-    @BeforeAll
-    static void setUp(){
+    /**
+     * Creates a new user object and stock ArrayList, then inserts
+     */
+    @BeforeEach
+    void setUp(){
         ArrayList<Stock> stocks = new ArrayList<>();
         stocks.add(new Stock(1, 1, "IBM", 100.0, 123.1));
         user = new User(1,
-                "test@gmail.com",
+                "testUser@test.com",
                 "p@ssw0rd",
                 false,
                 0.0,
@@ -44,130 +46,158 @@ public class DatabaseAPITest {
         );
         dbFile = new File("slayer.db");
         stock = stocks.get(0);
+
+        // Checks if the test case user is already in the database, if so, delete it
+        List<User> userList = selectFromUserWhereEmail(user.getEmail());
+
+        if(!userList.isEmpty()){
+            User tempUser = userList.get(0);
+            jdbcTemplate.execute("DELETE FROM stock WHERE ownerId="+tempUser.getId());
+            jdbcTemplate.execute("DELETE FROM user WHERE id="+tempUser.getId());
+        }
+
+        // Insert test case user to the database
+        jdbcTemplate.execute(String.format("INSERT INTO user (email, password, isLocked, availableFunds) " +
+            "VALUES ('%1$s', '%2$s', '%3$b', '%4$f')",
+            user.getEmail(),
+            user.getPassword(),
+            user.getIsLocked(),
+            user.getAvailableFunds()
+        ));
+
+        userList = selectFromUserWhereEmail(user.getEmail());
+
+        jdbcTemplate.execute(String.format("INSERT INTO stock (ownerId, symbol, volume, value) " +
+            "VALUES ('%1$d', '%2$s', '%3$f', '%4$f')",
+            userList.get(0).getId(),
+            stocks.get(0).getSymbol(),
+            stocks.get(0).getVolume(),
+            stocks.get(0).getValue()
+        ));
+    }
+
+    @AfterEach
+    void tearDown() {
+        deleteSetUpDatabaseEntry();
+    }
+
+    private List<User> selectFromUserWhereEmail(String email){
+        return jdbcTemplate.query(String.format("SELECT * FROM user WHERE email='%s'", email),
+            (resultSet, rowNum) -> new User(
+                resultSet.getInt("id"),
+                resultSet.getString("email"),
+                resultSet.getString("password"),
+                resultSet.getBoolean("isLocked"),
+                resultSet.getDouble("availableFunds")
+            )
+        );
+    }
+
+    private List<Stock> selectFromStockWhereOwnerId(int ownerId){
+        return jdbcTemplate.query(String.format("SELECT * FROM stock WHERE ownerId='%d'", ownerId),
+            (resultSet, rowNum) -> new Stock(
+                resultSet.getInt("id"),
+                resultSet.getInt("ownerId"),
+                resultSet.getString("symbol"),
+                resultSet.getDouble("volume"),
+                resultSet.getDouble("value")
+            )
+        );
+    }
+
+    private void deleteSetUpDatabaseEntry(){
+        List<User> userList = selectFromUserWhereEmail(user.getEmail());
+        if(!userList.isEmpty()){
+            jdbcTemplate.execute("DELETE FROM stock WHERE ownerId="+userList.get(0).getId());
+            jdbcTemplate.execute("DELETE FROM user WHERE id="+userList.get(0).getId());
+        }
     }
 
     @Test
-    @Order(1)
     void initDatabaseTest(){
         databaseAPI.initDatabase();
         assert dbFile.exists();
+        assert !selectFromUserWhereEmail(user.getEmail()).isEmpty()
+                : "User database is expected to be populated with at least one value before each test";
     }
 
     @Test
-    @Order(2) // FIXME default user should be deleted from the database before this test
-    void addUserRecordTest(){
+    void addUserRecordTest() throws Exception{
+        if(!selectFromUserWhereEmail(user.getEmail()).isEmpty()){
+            deleteSetUpDatabaseEntry();
+        }
+
         String email = user.getEmail();
         String password = user.getPassword();
-        try{
-            databaseAPI.addUserRecord(email, password);
-        }catch(Exception e){
-            System.err.print(e.getMessage());
-        }
+        databaseAPI.addUserRecord(email, password);
         List<User> users = queryForUsers();
 
         assert !users.isEmpty() : "user table should be populated with at least one value";
+        assert Objects.equals(selectFromUserWhereEmail(user.getEmail()).get(0).getEmail(), user.getEmail())
+                : "user table should be populated with the following email : "+
+                user.getEmail()+"\nReceived : "+selectFromUserWhereEmail(user.getEmail()).get(0).getEmail();
 
-        boolean userFound = false;
-        for (User user: users) {
-            if (Objects.equals(user.getEmail(), email)
-                    && Objects.equals(user.getPassword(), password)) {
-                userFound = true;
-                break;
-            }
-        }
-
-        assert userFound : "could not find the user that was just added to slayer.db";
-
-        assertThrows(Exception.class, () -> {
+        assertThrows(UserAlreadyExistsException.class, () -> {
             databaseAPI.addUserRecord(email, password);
         }, "Expecting to throw an exception that the user is already register in the database");
 
     }
 
     @Test
-    @Order(3)
     void updateUserRecordTest() throws Exception {
-        String emailUpdate = "testUpdate@update.com";
-        String passwordUpdate = "updatePass";
-        User oldUpdate = new User();
+        User oldUpdate;
         User updatedUser = new User("testUpdatedUser@updated.com", "updatedPassword");
 
-        try{
-            databaseAPI.addUserRecord(emailUpdate, passwordUpdate);
-        }catch(Exception e){ // Caught if user already in database, needs to be removed then re-added for test
-            databaseAPI.deleteUserRecord(emailUpdate);
-            databaseAPI.addUserRecord(emailUpdate, passwordUpdate);
-        }
-        oldUpdate = databaseAPI.getUserRecord(emailUpdate);
+        oldUpdate = databaseAPI.getUserRecord(user.getEmail());
         databaseAPI.updateUserRecord(oldUpdate.getId(), updatedUser);
 
         assertThrows(Exception.class, () -> {
-            databaseAPI.getUserRecord(emailUpdate);
+            databaseAPI.getUserRecord(user.getEmail());
         }, "Expected to not find the old record that was just updated");
 
         assert Objects.equals(databaseAPI.getUserRecord(updatedUser.getEmail()).getEmail(), updatedUser.getEmail())
                 : "Expect database entry updated email to match local updated email";
-
-
-        databaseAPI.deleteUserRecord(databaseAPI.getUserRecord(updatedUser.getEmail()).getId());
     }
 
     @Test
-    @Order(4)
-    void addStockRecordTest(){
-        int ownerId = user.getStocks().get(0).getOwnerId();
-        String symbol = user.getStocks().get(0).getSymbol();
-        double volume = user.getStocks().get(0).getVolume();
-        double value = user.getStocks().get(0).getValue();
-
-        try{
-            databaseAPI.addStockRecord(ownerId, symbol, volume, value);
-        }catch (Exception e){
-            System.err.println(e.getMessage());
+    void addStockRecordTest() throws Exception {
+        if(!selectFromStockWhereOwnerId(selectFromUserWhereEmail(user.getEmail()).get(0).getId()).isEmpty()){
+            jdbcTemplate.execute("DELETE FROM stock WHERE ownerId="+selectFromUserWhereEmail(user.getEmail()).get(0).getId());
         }
 
-        List<Stock> stocks = queryForStocks();
+        int ownerId = selectFromUserWhereEmail(user.getEmail()).get(0).getId();
+        String symbol = stock.getSymbol();
+        double volume = stock.getVolume();
+        double value = stock.getValue();
+
+        databaseAPI.addStockRecord(ownerId, symbol, volume, value);
+        List<Stock> stocks = selectFromStockWhereOwnerId(selectFromUserWhereEmail(user.getEmail()).get(0).getId());
 
         assert !stocks.isEmpty() : "Stocks table should have at least one value inserted";
+        assert stocks.get(0).getOwnerId() == ownerId : "Owner ID should match the User ID";
 
-        boolean stockFound = false;
-        for (Stock stock: stocks) {
-            if (stock.getOwnerId() == ownerId && Objects.equals(stock.getSymbol(), symbol)) {
-                stockFound = true;
-                break;
-            }
-        }
-
-        assert stockFound : "Should have a stock with the same ownerId and symbol as was inserted";
-
-        // TODO, create code that checks what IDs that are in use, then, randomly select one not in use.
-        int notValidOwnerId = 99999;
-
-        assertThrows(Exception.class, () -> {
-            databaseAPI.addStockRecord(notValidOwnerId, symbol, volume, value);
-        }, "There should be no owner with an ID of " + notValidOwnerId);
+        assertThrows(UserNotFoundException.class, () -> {
+            databaseAPI.addStockRecord(-1, symbol, volume, value);
+        }, "There should be no owner with an ID of " + -1);
     }
 
     @Test
-    @Order(5)
     void pairUsersToStocksTest() throws Exception{
-        databaseAPI.addUserRecord(user);
-        try{
-            databaseAPI.addStockRecord(stock);
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-        }
+        User userRecord = databaseAPI.getUserRecord(user.getEmail());
+        Stock userStock = userRecord.getStocks().get(0);
+        assert Objects.equals(userStock.getSymbol(), stock.getSymbol())
+                : "Stock symbols should match";
 
         List<User> usersPaired = databaseAPI.pairUsersToStocks(queryForUsers(), queryForStocks());
 
         User userPaired = usersPaired.get(0);
-        assert !userPaired.getStocks().isEmpty() : "User should now be paired with a stock object";
-        // FIXME This should be done in a way that checks all users are paired, not just the first user
-        assert (userPaired.getStocks().get(0).getOwnerId() == queryForStocks().get(0).getOwnerId()) : "The paired stock should belong to the user with user ID 1";
+        assert !userPaired.getStocks().isEmpty()
+                : "User should now be paired with a stock object";
+        assert (userPaired.getStocks().get(userRecord.getId()-1).getOwnerId() == queryForStocks().get(userRecord.getId()-1).getOwnerId())
+                : "The paired stock should belong to the user with user ID "+userRecord.getId();
     }
 
     @Test
-    @Order(6)
     void getUserTableInfoTest(){
         List<User> users = databaseAPI.getUserTableInfo();
         List<User> localUsersQuery = queryForUsers();
@@ -184,7 +214,6 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(7)
     void getStockTableInfoTest(){
         List<Stock> stocks = databaseAPI.getStockTableInfo();
         List<Stock> localStocksQuery = queryForStocks();
@@ -201,77 +230,62 @@ public class DatabaseAPITest {
     }
 
     @Test
-    @Order(8)
-    void getUserRecordTest(){
-        try{
-            User userRecord = databaseAPI.getUserRecord(user.getId());
-            assertNotNull(userRecord, "The retrieved user is not expected to be null");
-            assert Objects.equals(userRecord.getEmail(), user.getEmail()) : "The retrieved user should have matching emails";
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-        }
+    void getUserRecordTest() throws Exception{
+        // Use ID for getUserRecord
+        User userRecordWithId = databaseAPI.getUserRecord(selectFromUserWhereEmail(user.getEmail()).get(0).getId());
+        assertNotNull(userRecordWithId, "The retrieved user is not expected to be null");
+        assert Objects.equals(userRecordWithId.getEmail(), user.getEmail())
+                : "The retrieved user should have matching emails";
+
+        // Use Email for getUserRecord
+        User userRecordWithEmail = databaseAPI.getUserRecord(user.getEmail());
+        assertNotNull(userRecordWithEmail, "The retrieved user is not expected to be null");
+        assert Objects.equals(userRecordWithEmail.getEmail(), user.getEmail())
+                : "The retrieved user should have matching emails";
     }
 
     @Test
-    @Order(9)
-    void addAvailableFundsTest() {
-        try{
-            User userRecordBeforeAddition = databaseAPI.getUserRecord(user.getId());
-            databaseAPI.addAvailableFunds(user, 20.00);
-            User userRecordAfterAddition = databaseAPI.getUserRecord(user.getId());
-            assert userRecordAfterAddition.getAvailableFunds() > userRecordBeforeAddition.getAvailableFunds();
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-        }
+    void addAvailableFundsTest() throws Exception {
+        User userRecordBeforeAddition = selectFromUserWhereEmail(user.getEmail()).get(0);
+        databaseAPI.addAvailableFunds(userRecordBeforeAddition, 20.00);
+        User userRecordAfterAddition = selectFromUserWhereEmail(user.getEmail()).get(0);
+        assert userRecordAfterAddition.getAvailableFunds() > userRecordBeforeAddition.getAvailableFunds();
     }
 
     @Test
-    @Order(10)
-    void subtractAvailableFundsTest() {
-        try{
-            User userRecordBeforeSubtraction = databaseAPI.getUserRecord(user.getId());
-            databaseAPI.subtractAvailableFunds(user, 20.00);
-            User userRecordAfterSubtraction = databaseAPI.getUserRecord(user.getId());
-            assert userRecordAfterSubtraction.getAvailableFunds() < userRecordBeforeSubtraction.getAvailableFunds();
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-        }
+    void subtractAvailableFundsTest() throws Exception {
+        User userRecordBeforeSubtraction = selectFromUserWhereEmail(user.getEmail()).get(0);
+        databaseAPI.subtractAvailableFunds(userRecordBeforeSubtraction, 20.00);
+        User userRecordAfterSubtraction = selectFromUserWhereEmail(user.getEmail()).get(0);
+        assert userRecordAfterSubtraction.getAvailableFunds() < userRecordBeforeSubtraction.getAvailableFunds();
     }
 
     @Test
-    @Order(11)
-    void toggleUserLockedTest() throws Exception{
-        try{
-            User userRecordBeforeToggle = databaseAPI.getUserRecord(user.getId());
-            databaseAPI.toggleUserLocked(user);
-            User userRecordAfterToggle = databaseAPI.getUserRecord(user.getId());
-            assert userRecordBeforeToggle.getIsLocked() != userRecordAfterToggle.getIsLocked();
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-        }
+    void toggleUserLockedTest() throws Exception {
+        User userRecordBeforeToggle = selectFromUserWhereEmail(user.getEmail()).get(0);
+        databaseAPI.toggleUserLocked(userRecordBeforeToggle);
+        User userRecordAfterToggle = selectFromUserWhereEmail(user.getEmail()).get(0);
+        assert userRecordBeforeToggle.getIsLocked() != userRecordAfterToggle.getIsLocked();
     }
 
     @Test
-    @Order(12)
     void deleteStockRecordTest(){
-        List<Stock> localStocksQuery = queryForStocks();
-        for (int i = 1; i <= localStocksQuery.size(); i++) {
-            databaseAPI.deleteStockRecord(i);
-        }
-        localStocksQuery = queryForStocks();
-        assert localStocksQuery.isEmpty() : "Stock table is expected to be empty";
+        databaseAPI.deleteStockRecord(selectFromUserWhereEmail(user.getEmail()).get(0).getId());
+        User userAfterStockDeleted = selectFromUserWhereEmail(user.getEmail()).get(0);
+        assert userAfterStockDeleted.getStocks().isEmpty()
+                : "Stock added to test user should have been deleted";
     }
 
     @Test
-    @Order(13)
-    void deleteUserRecordTest(){
-        List<User> localUserQuery = queryForUsers();
-        for (int i = 1; i <= localUserQuery.size(); i++) {
-            databaseAPI.deleteUserRecord(i);
-        }
-        localUserQuery = queryForUsers();
-        assert localUserQuery.isEmpty() : "User table is expected to be empty";
-        assert queryForStocks().isEmpty() : "Stock table is expected to be empty";
+    void deleteUserRecordTest() throws Exception{
+        User userInfoBeforeDeletion = selectFromUserWhereEmail(user.getEmail()).get(0);
+
+        databaseAPI.deleteUserRecord(user.getEmail());
+        assert selectFromUserWhereEmail(user.getEmail()).isEmpty()
+                : "User test record should have been deleted";
+
+        List<Stock> userStocks = selectFromStockWhereOwnerId(userInfoBeforeDeletion.getId());
+        assert userStocks.isEmpty() : "User test record's stocks should have been deleted";
     }
 
     private List<User> queryForUsers(){
@@ -295,17 +309,6 @@ public class DatabaseAPITest {
         });
 
         return users;
-    }
-
-    private User findUser(User user) throws Exception {
-        List<User> users = queryForUsers();
-        for (User value : users) {
-            if (Objects.equals(user.getEmail(), value.getEmail())) {
-                return user;
-            }
-        }
-
-        throw new Exception("User Not Found!");
     }
 
     private List<Stock> queryForStocks(){

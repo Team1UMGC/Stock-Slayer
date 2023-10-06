@@ -1,7 +1,7 @@
 package com.groupone.api;
 
-import com.groupone.model.Stock;
-import com.groupone.model.User;
+import com.groupone.exception.*;
+import com.groupone.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -75,16 +75,16 @@ public class DatabaseAPI implements CommandLineRunner {
      * Add User to database
      * @param email String, email, unique to each user
      * @param password String, password that the user creates for logging in
-     * @throws Exception thrown when a matching email is already found in the database.
+     * @throws UserAlreadyExistsException thrown when a matching email is already found in the database.
      */
-    public void addUserRecord(String email, String password) throws Exception{
+    public void addUserRecord(String email, String password) throws UserAlreadyExistsException {
         boolean isUserInDatabase = false;
         try{
             User user = getUserRecord(email);
             isUserInDatabase = true;
         }catch(Exception ignored){}
 
-        if(isUserInDatabase) throw new Exception("User already in database");
+        if(isUserInDatabase) throw new UserAlreadyExistsException();
 
         final String addSql = "INSERT INTO user (email, password) VALUES (?, ?)";
         Object[] params = {email, password};
@@ -132,9 +132,9 @@ public class DatabaseAPI implements CommandLineRunner {
      * Queries for a single user record using a given user ID
      * @param userId int, the ID of the user from the user table
      * @return User, returns complete user object from the provided user ID
-     * @throws Exception Thrown if a user with the given ID is not found in the database
+     * @throws UserNotFoundException Thrown if a user with the given ID is not found in the database
      */
-    public User getUserRecord(int userId) throws Exception {
+    public User getUserRecord(int userId) throws UserNotFoundException {
         List<User> users = jdbcTemplate.query("SELECT * FROM user WHERE id="+userId,
             (resultSet, rowNum) -> new User(
                 resultSet.getInt("id"),
@@ -144,7 +144,7 @@ public class DatabaseAPI implements CommandLineRunner {
                 resultSet.getDouble("availableFunds")
             )
         );
-        if(users.isEmpty()) throw new Exception("User not found!");
+        if(users.isEmpty()) throw new UserNotFoundException();
 
         User user = users.get(0);
         user.setStocks(getStocksOfUser(user));
@@ -155,9 +155,9 @@ public class DatabaseAPI implements CommandLineRunner {
      * Queries for a single user record using a given user email
      * @param userEmail String, the email of the suer from the user table
      * @return User, returns complete user object from the provided user email
-     * @throws Exception Thrown if a user with the given email is not found in the database
+     * @throws UserNotFoundException Thrown if a user with the given email is not found in the database
      */
-    public User getUserRecord(String userEmail) throws Exception{
+    public User getUserRecord(String userEmail) throws UserNotFoundException {
         List<User> users = jdbcTemplate.query(String.format("SELECT * FROM user WHERE email='%s'", userEmail),
             (resultSet, rowNum) -> new User(
                 resultSet.getInt("id"),
@@ -167,7 +167,7 @@ public class DatabaseAPI implements CommandLineRunner {
                 resultSet.getDouble("availableFunds")
             )
         );
-        if(users.isEmpty()) throw new Exception("User not found!");
+        if(users.isEmpty()) throw new UserNotFoundException();
 
         User user = users.get(0);
         user.setStocks(getStocksOfUser(user));
@@ -198,9 +198,10 @@ public class DatabaseAPI implements CommandLineRunner {
      * Note that if a field must remain the same, parse a User object that retains the same field value as the previous record
      * @param userToBeUpdatedId int, the ID of the user that is going to be removed from the user table
      * @param updatedUserInfo User, user object that will replace all details of the selected user (except for id)
-     * @throws Exception Thrown if the update of the user has failed, where user param's email does not match what has been updated in the database
+     * @throws UserUpdateFailedException Thrown if the update of the user has failed,
+     * where user param's email does not match what has been updated in the database
      */
-    public void updateUserRecord(int userToBeUpdatedId, User updatedUserInfo) throws Exception {
+    public void updateUserRecord(int userToBeUpdatedId, User updatedUserInfo) throws UserUpdateFailedException {
         jdbcTemplate.execute(String.format("UPDATE user SET " +
             "email='%1$s', " +
             "password='%2$s', " +
@@ -222,7 +223,7 @@ public class DatabaseAPI implements CommandLineRunner {
         }
 
         if(!Objects.equals(updatedUserInfo.getEmail(), user.getEmail())) // thrown if localUserInfo != retrieved databaseUserInfo
-            throw new Exception("Attempted update of user has failed!");
+            throw new UserUpdateFailedException();
         else System.out.printf("Updated User: %1$s %n %2$s", userToBeUpdatedId, user);
     }
 
@@ -252,9 +253,9 @@ public class DatabaseAPI implements CommandLineRunner {
      * @param symbol String, symbol of the stock
      * @param volume double, number of shares purchased
      * @param value double, value of each share of the stock
-     * @throws Exception thrown if a User does not exist that could own the stock in the database
+     * @throws UserNotFoundException thrown if a User does not exist that could own the stock in the database
      */
-    public void addStockRecord(int ownerId, String symbol, double volume, double value) throws Exception{
+    public void addStockRecord(int ownerId, String symbol, double volume, double value) throws UserNotFoundException {
 
         // Tests here if the ownerId given has a corresponding owner in the user table
         User user = new User();
@@ -263,7 +264,7 @@ public class DatabaseAPI implements CommandLineRunner {
             getUserRecord(ownerId);
             isValidOwnedId = true;
         }catch(Exception ignored){}
-        if(!isValidOwnedId) throw new Exception("Not Valid Owner ID!");
+        if(!isValidOwnedId) throw new UserNotFoundException("Not Valid Owner ID");
 
         // If stock will have corresponding owner, then add stock to stock table
         final String addSql = String.format("INSERT INTO stock (ownerId, symbol, volume, value) VALUES ('%1$s', '%2$s', '%3$s', '%4$s');",
@@ -297,9 +298,9 @@ public class DatabaseAPI implements CommandLineRunner {
      * Queries the database for a single stock and returns a single stock object
      * @param stockId ID of the stock from the stock table
      * @return Stock, returns a stock object from a given stock ID in the stock table
-     * @throws Exception thrown if no stock with the given stock ID was found
+     * @throws StockNotFoundException thrown if no stock with the given stock ID was found
      */
-    public Stock getStockRecord(int stockId) throws Exception{
+    public Stock getStockRecord(int stockId) throws StockNotFoundException {
         List<Stock> stocks = jdbcTemplate.query("SELECT * FROM stock WHERE id=" + stockId,
             (resultSet, rowNum) -> new Stock(
                 resultSet.getInt("id"),
@@ -309,7 +310,7 @@ public class DatabaseAPI implements CommandLineRunner {
                 resultSet.getDouble("value")
             ));
 
-        if(stocks.isEmpty()) throw new Exception("No stock with given ID was found!");
+        if(stocks.isEmpty()) throw new StockNotFoundException();
 
         return stocks.get(0);
     }

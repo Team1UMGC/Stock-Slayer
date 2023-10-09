@@ -49,14 +49,16 @@ public class UserController {
     public RedirectView authenticate(@RequestParam("email") String email,
                                      @RequestParam("password") String password){
         RedirectView direct = new RedirectView("/login");
-        if(userService.authenticate(email, password)){
             try{
-                userService.setLogged(new User(email, password));
-                direct = new RedirectView("/portfolio");
+                if(userService.authenticate(email, password)){
+                    userService.setLogged(new User(email, password));
+                    direct = new RedirectView("/portfolio");
+                } else {
+                    System.err.println("User was not authenticated!");
+                }
             }catch (Exception e){
                 System.err.println(e.getMessage());
             }
-        }
         return direct;
     }
 

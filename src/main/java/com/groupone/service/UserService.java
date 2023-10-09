@@ -1,12 +1,14 @@
 package com.groupone.service;
 
 import com.groupone.api.DatabaseAPI;
+import com.groupone.exception.UserNotFoundException;
 import com.groupone.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This service is used to log in, register, and authenticate logging in as well as hold what user is
@@ -26,14 +28,17 @@ public class UserService {
      * @param password Checks that the email found contains this password
      * @return boolean, returns true if the user was found and authenticated with the correct password, returns false otherwise.
      */
-    public boolean authenticate(String email, String password) { // TODO, check if the account is locked
-        boolean matchFound = false;
-        List<User> users = databaseService.getUserTableInfo();
-        for (User user : users) {
-            matchFound = match(user, email, password);
-            if(matchFound) break;
-        }
-        return matchFound;
+    public boolean authenticate(String email, String password) throws UserNotFoundException { // TODO, check if the account is locked
+        User user = databaseService.getUserRecord(email);
+        return Objects.equals(user.getEmail(), email) && Objects.equals(user.getPassword(), password);
+
+        //        boolean matchFound = false;
+//        List<User> users = databaseService.getUserTableInfo();
+//        for (User user : users) {
+//            matchFound = match(user, email, password);
+//            if(matchFound) break;
+//        }
+//        return matchFound;
     }
 
     /**
@@ -64,7 +69,7 @@ public class UserService {
      * @param loggedAs User, returns the user object that is currently logged in
      */
     public void setLogged(User loggedAs) throws Exception {
-        this.loggedAs = databaseService.getUserRecord(loggedAs);
+        this.loggedAs = databaseService.getUserRecord(loggedAs.getEmail());
     }
 
     /**

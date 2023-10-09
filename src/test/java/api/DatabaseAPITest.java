@@ -18,6 +18,9 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests methods from DatabaseAPI using JUnit 5
+ */
 @SpringBootTest(classes = {StockSlayerApplication.class})
 public class DatabaseAPITest {
 

@@ -1,6 +1,7 @@
 package com.groupone.service;
 
 import com.groupone.api.DatabaseAPI;
+import com.groupone.exception.UserNotFoundException;
 import com.groupone.model.Stock;
 import com.groupone.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,10 @@ public class DatabaseService {
      */
     public User getUserRecord(User user) throws Exception {
         return databaseAPI.getUserRecord(user.getId());
+    }
+
+    public User getUserRecord(String email) throws UserNotFoundException {
+        return databaseAPI.getUserRecord(email);
     }
 
     /**

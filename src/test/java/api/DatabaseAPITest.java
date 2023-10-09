@@ -4,6 +4,7 @@ import com.groupone.StockSlayerApplication;
 import com.groupone.api.DatabaseAPI;
 import com.groupone.exception.UserAlreadyExistsException;
 import com.groupone.exception.UserNotFoundException;
+import com.groupone.exception.UserUpdateFailedException;
 import com.groupone.model.Stock;
 import com.groupone.model.User;
 import org.junit.jupiter.api.*;
@@ -81,38 +82,11 @@ public class DatabaseAPITest {
         deleteSetUpDatabaseEntry();
     }
 
-    private List<User> selectFromUserWhereEmail(String email){
-        return jdbcTemplate.query(String.format("SELECT * FROM user WHERE email='%s'", email),
-            (resultSet, rowNum) -> new User(
-                resultSet.getInt("id"),
-                resultSet.getString("email"),
-                resultSet.getString("password"),
-                resultSet.getBoolean("isLocked"),
-                resultSet.getDouble("availableFunds")
-            )
-        );
-    }
-
-    private List<Stock> selectFromStockWhereOwnerId(int ownerId){
-        return jdbcTemplate.query(String.format("SELECT * FROM stock WHERE ownerId='%d'", ownerId),
-            (resultSet, rowNum) -> new Stock(
-                resultSet.getInt("id"),
-                resultSet.getInt("ownerId"),
-                resultSet.getString("symbol"),
-                resultSet.getDouble("volume"),
-                resultSet.getDouble("value")
-            )
-        );
-    }
-
-    private void deleteSetUpDatabaseEntry(){
-        List<User> userList = selectFromUserWhereEmail(user.getEmail());
-        if(!userList.isEmpty()){
-            jdbcTemplate.execute("DELETE FROM stock WHERE ownerId="+userList.get(0).getId());
-            jdbcTemplate.execute("DELETE FROM user WHERE id="+userList.get(0).getId());
-        }
-    }
-
+    /**
+     * Tests database initialization on application start up.
+     * It should connect to the database and print out all
+     * users and stocks in the database upon launch for debugging purposes.
+     */
     @Test
     void initDatabaseTest(){
         databaseAPI.initDatabase();
@@ -121,8 +95,14 @@ public class DatabaseAPITest {
                 : "User database is expected to be populated with at least one value before each test";
     }
 
+    /**
+     * Tests adding a new user into the database.
+     * This should allow users to add new accounts to the application
+     * then store their information in the database.
+     * @throws UserAlreadyExistsException Expecting to be thrown if a matching email is found in the database.
+     */
     @Test
-    void addUserRecordTest() throws Exception{
+    void addUserRecordTest() throws UserAlreadyExistsException {
         if(!selectFromUserWhereEmail(user.getEmail()).isEmpty()){
             deleteSetUpDatabaseEntry();
         }
@@ -143,8 +123,16 @@ public class DatabaseAPITest {
 
     }
 
+    /**
+     * Tests updating an already existing user in the database with a new created user object.
+     * This is intended for updating a forgotten password, or changing emails. But changing other fields
+     * for any reason is permitted as needed.
+     * @throws UserNotFoundException Thrown if the user does not exist in the database
+     * @throws UserUpdateFailedException Thrown if updating the user's information in the database
+     * has failed for any reason
+     */
     @Test
-    void updateUserRecordTest() throws Exception {
+    void updateUserRecordTest() throws UserNotFoundException, UserUpdateFailedException {
         User oldUpdate;
         User updatedUser = new User("testUpdatedUser@updated.com", "updatedPassword");
 
@@ -159,8 +147,13 @@ public class DatabaseAPITest {
                 : "Expect database entry updated email to match local updated email";
     }
 
+    /**
+     * Tests adding a stock record to the database to the stock table.
+     * Used when purchasing a stock and attaching the stock to a user as to symbol ownership.
+     * @throws UserNotFoundException Thrown if the user does not exist in the database
+     */
     @Test
-    void addStockRecordTest() throws Exception {
+    void addStockRecordTest() throws UserNotFoundException {
         if(!selectFromStockWhereOwnerId(selectFromUserWhereEmail(user.getEmail()).get(0).getId()).isEmpty()){
             jdbcTemplate.execute("DELETE FROM stock WHERE ownerId="+selectFromUserWhereEmail(user.getEmail()).get(0).getId());
         }
@@ -181,8 +174,12 @@ public class DatabaseAPITest {
         }, "There should be no owner with an ID of " + -1);
     }
 
+    /**
+     *
+     * @throws UserNotFoundException Thrown if the user does not exist in the database
+     */
     @Test
-    void pairUsersToStocksTest() throws Exception{
+    void pairUsersToStocksTest() throws UserNotFoundException {
         User userRecord = databaseAPI.getUserRecord(user.getEmail());
         Stock userStock = userRecord.getStocks().get(0);
         assert Objects.equals(userStock.getSymbol(), stock.getSymbol())
@@ -197,6 +194,9 @@ public class DatabaseAPITest {
                 : "The paired stock should belong to the user with user ID "+userRecord.getId();
     }
 
+    /**
+     *
+     */
     @Test
     void getUserTableInfoTest(){
         List<User> users = databaseAPI.getUserTableInfo();
@@ -213,6 +213,9 @@ public class DatabaseAPITest {
         assert isEqual : "Local test query should match with called database API method query for users";
     }
 
+    /**
+     *
+     */
     @Test
     void getStockTableInfoTest(){
         List<Stock> stocks = databaseAPI.getStockTableInfo();
@@ -229,8 +232,12 @@ public class DatabaseAPITest {
         assert isEqual : "Local test query should match with called database API method query for stocks";
     }
 
+    /**
+     *
+     * @throws UserNotFoundException
+     */
     @Test
-    void getUserRecordTest() throws Exception{
+    void getUserRecordTest() throws UserNotFoundException{
         // Use ID for getUserRecord
         User userRecordWithId = databaseAPI.getUserRecord(selectFromUserWhereEmail(user.getEmail()).get(0).getId());
         assertNotNull(userRecordWithId, "The retrieved user is not expected to be null");
@@ -244,30 +251,45 @@ public class DatabaseAPITest {
                 : "The retrieved user should have matching emails";
     }
 
+    /**
+     *
+     * @throws UserNotFoundException
+     */
     @Test
-    void addAvailableFundsTest() throws Exception {
+    void addAvailableFundsTest() throws UserNotFoundException {
         User userRecordBeforeAddition = selectFromUserWhereEmail(user.getEmail()).get(0);
         databaseAPI.addAvailableFunds(userRecordBeforeAddition, 20.00);
         User userRecordAfterAddition = selectFromUserWhereEmail(user.getEmail()).get(0);
         assert userRecordAfterAddition.getAvailableFunds() > userRecordBeforeAddition.getAvailableFunds();
     }
 
+    /**
+     *
+     * @throws UserNotFoundException
+     */
     @Test
-    void subtractAvailableFundsTest() throws Exception {
+    void subtractAvailableFundsTest() throws UserNotFoundException {
         User userRecordBeforeSubtraction = selectFromUserWhereEmail(user.getEmail()).get(0);
         databaseAPI.subtractAvailableFunds(userRecordBeforeSubtraction, 20.00);
         User userRecordAfterSubtraction = selectFromUserWhereEmail(user.getEmail()).get(0);
         assert userRecordAfterSubtraction.getAvailableFunds() < userRecordBeforeSubtraction.getAvailableFunds();
     }
 
+    /**
+     *
+     * @throws UserNotFoundException
+     */
     @Test
-    void toggleUserLockedTest() throws Exception {
+    void toggleUserLockedTest() throws UserNotFoundException {
         User userRecordBeforeToggle = selectFromUserWhereEmail(user.getEmail()).get(0);
         databaseAPI.toggleUserLocked(userRecordBeforeToggle);
         User userRecordAfterToggle = selectFromUserWhereEmail(user.getEmail()).get(0);
         assert userRecordBeforeToggle.getIsLocked() != userRecordAfterToggle.getIsLocked();
     }
 
+    /**
+     *
+     */
     @Test
     void deleteStockRecordTest(){
         databaseAPI.deleteStockRecord(selectFromUserWhereEmail(user.getEmail()).get(0).getId());
@@ -276,8 +298,12 @@ public class DatabaseAPITest {
                 : "Stock added to test user should have been deleted";
     }
 
+    /**
+     *
+     * @throws UserNotFoundException
+     */
     @Test
-    void deleteUserRecordTest() throws Exception{
+    void deleteUserRecordTest() throws UserNotFoundException {
         User userInfoBeforeDeletion = selectFromUserWhereEmail(user.getEmail()).get(0);
 
         databaseAPI.deleteUserRecord(user.getEmail());
@@ -288,16 +314,64 @@ public class DatabaseAPITest {
         assert userStocks.isEmpty() : "User test record's stocks should have been deleted";
     }
 
+    /**
+     *
+     * @param email
+     * @return
+     */
+    private List<User> selectFromUserWhereEmail(String email){
+        return jdbcTemplate.query(String.format("SELECT * FROM user WHERE email='%s'", email),
+            (resultSet, rowNum) -> new User(
+                resultSet.getInt("id"),
+                resultSet.getString("email"),
+                resultSet.getString("password"),
+                resultSet.getBoolean("isLocked"),
+                resultSet.getDouble("availableFunds")
+            )
+        );
+    }
+
+    /**
+     *
+     * @param ownerId
+     * @return
+     */
+    private List<Stock> selectFromStockWhereOwnerId(int ownerId){
+        return jdbcTemplate.query(String.format("SELECT * FROM stock WHERE ownerId='%d'", ownerId),
+            (resultSet, rowNum) -> new Stock(
+                resultSet.getInt("id"),
+                resultSet.getInt("ownerId"),
+                resultSet.getString("symbol"),
+                resultSet.getDouble("volume"),
+                resultSet.getDouble("value")
+            )
+        );
+    }
+
+    /**
+     *
+     */
+    private void deleteSetUpDatabaseEntry(){
+        List<User> userList = selectFromUserWhereEmail(user.getEmail());
+        if(!userList.isEmpty()){
+            jdbcTemplate.execute("DELETE FROM stock WHERE ownerId="+userList.get(0).getId());
+            jdbcTemplate.execute("DELETE FROM user WHERE id="+userList.get(0).getId());
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
     private List<User> queryForUsers(){
         List<User> users = jdbcTemplate.query("SELECT * FROM user;",
-            (resultSet, rowNum) ->
-                new User(
-                        resultSet.getInt("id"),
-                        resultSet.getString("email"),
-                        resultSet.getString("password"),
-                        resultSet.getBoolean("isLocked"),
-                        resultSet.getDouble("availableFunds")
-                )
+            (resultSet, rowNum) -> new User(
+                resultSet.getInt("id"),
+                resultSet.getString("email"),
+                resultSet.getString("password"),
+                resultSet.getBoolean("isLocked"),
+                resultSet.getDouble("availableFunds")
+            )
         );
 
         users.forEach(user -> {
@@ -311,6 +385,10 @@ public class DatabaseAPITest {
         return users;
     }
 
+    /**
+     *
+     * @return
+     */
     private List<Stock> queryForStocks(){
         return jdbcTemplate.query("SELECT * FROM stock;",
             (resultSet, rowNum) -> new Stock(

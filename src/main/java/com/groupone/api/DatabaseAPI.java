@@ -123,9 +123,9 @@ public class DatabaseAPI implements CommandLineRunner {
     /**
      * Deletes User from the database using an email as a param
      * @param email String, email associated with the account
-     * @throws Exception Thrown if the user cannot be found by the given email
+     * @throws UserNotFoundException Thrown if the user does not exist in the database
      */
-    public void deleteUserRecord(String email) throws Exception {
+    public void deleteUserRecord(String email) throws UserNotFoundException {
         User user = getUserRecord(email);
         deleteUserRecord(user.getId());
     }
@@ -337,8 +337,9 @@ public class DatabaseAPI implements CommandLineRunner {
      * Adds funds to a user in the database
      * @param user User, user that will be receiving additional funds
      * @param funds double, amount to be added
+     * @throws UserNotFoundException Thrown if the user does not exist in the database
      */
-    public void addAvailableFunds(User user, double funds) throws Exception{
+    public void addAvailableFunds(User user, double funds) throws UserNotFoundException {
         User userRecord = getUserRecord(user.getId());
         userRecord.addFunds(funds);
         jdbcTemplate.execute(String.format("UPDATE user SET availableFunds=%1$f WHERE id=%2$s;",
@@ -350,8 +351,9 @@ public class DatabaseAPI implements CommandLineRunner {
      * Subtract funds from a user in the database
      * @param user User, user that will be receiving subtracted funds
      * @param funds double, amount to be subtracted
+     * @throws UserNotFoundException Thrown if the user does not exist in the database
      */
-    public void subtractAvailableFunds(User user, double funds) throws Exception {
+    public void subtractAvailableFunds(User user, double funds) throws UserNotFoundException {
         User userRecord = getUserRecord(user.getId());
         userRecord.subtractFunds(funds);
         jdbcTemplate.execute(String.format("UPDATE user SET availableFunds=%1$f WHERE id=%2$s;",
@@ -362,8 +364,9 @@ public class DatabaseAPI implements CommandLineRunner {
     /**
      * Toggles a user's isLocked field. If locked, user cannot log in. Otherwise, user can log in.
      * @param user User to have the isLocked field toggled
+     * @throws UserNotFoundException Thrown if the user does not exist in the database
      */
-    public void toggleUserLocked(User user) throws Exception{
+    public void toggleUserLocked(User user) throws UserNotFoundException{
         User userRecord = getUserRecord(user.getId());
         userRecord.toggleLock();
         jdbcTemplate.execute(String.format("UPDATE user SET isLocked=%1$s WHERE id='%2$s'",

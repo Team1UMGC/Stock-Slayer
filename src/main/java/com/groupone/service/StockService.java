@@ -112,18 +112,20 @@ public class StockService {
      * @param user User, specified user who shall be selling the stock
      * @param stockId int, ID of the stock that is going to be sold
      */
-    public void sellStock(User user, int stockId) {
+    public void sellStock(User user, int stockId) throws Exception {
         Stock stock = null;
-        try{
-            stock = databaseAPI.getStockRecord(stockId);
-            databaseAPI.addAvailableFunds(user, requestCloseValue(stock.getSymbol()));
-            databaseAPI.deleteStockRecord(stockId);
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-        }
+        stock = databaseAPI.getStockRecord(stockId);
+        databaseAPI.addAvailableFunds(user, requestCloseValue(stock.getSymbol()));
+        databaseAPI.deleteStockRecord(stockId);
     }
 
-    private double requestCloseValue(String symbol) throws Exception{
+    /**
+     * Helper method that calls stockAPI to get the current close price when selling a stock
+     * @param symbol String, the symbol the stock that is going to be requested
+     * @return double The current price of the stock
+     * @throws Exception Thrown if an error occurred when trying to request information from Alpha Vantage
+     */
+    private double requestCloseValue(String symbol) throws Exception {
         return stockAPI.getCurrentPrice(symbol);
     }
 

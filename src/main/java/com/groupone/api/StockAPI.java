@@ -24,11 +24,11 @@ public class StockAPI {
     }
 
     /**
-     *
-     * @param interval
-     * @param outputSize
-     * @param symbol
-     * @throws Exception
+     * Prints intra-day info about a single stock. Mainly used for debugging.
+     * @param interval Interval, interval object, expected to be something that works with IntraDay call like Interval.FIFTEEN_MIN
+     * @param outputSize OutputSize, outputSize object to tell the request what kind of output to produce.
+     * @param symbol String, symbol of the stock that is attempting to be requested
+     * @throws Exception Thrown if config data for the alpha vantage api wrapper hasn't been defined
      */
     public void printIntraDay(Interval interval, OutputSize outputSize, String symbol) throws Exception {
         if (API_CONFIG == null) {
@@ -38,23 +38,23 @@ public class StockAPI {
         AlphaVantage.api().init(API_CONFIG);
         System.out.println(
             AlphaVantage.api()
-                    .timeSeries()
-                    .intraday()
-                    .forSymbol(symbol)
-                    .interval(interval)
-                    .outputSize(outputSize)
-                    .fetchSync()
-                    .toString()
+                .timeSeries()
+                .intraday()
+                .forSymbol(symbol)
+                .interval(interval)
+                .outputSize(outputSize)
+                .fetchSync()
+                .toString()
         );
     }
 
     /**
-     *
-     * @param interval
-     * @param outputSize
-     * @param symbol
-     * @return
-     * @throws Exception
+     * Returns intra-day info about a single stock as a TimeSeriesResponse object
+     * @param interval Interval, interval object, expected to be something that works with IntraDay call like Interval.FIFTEEN_MIN
+     * @param outputSize OutputSize, outputSize object to tell the request what kind of output to produce.
+     * @param symbol String, symbol of the stock that is attempting to be requested
+     * @return TimeSeriesResponse, contains data different object types that contain information about the stock being requested
+     * @throws Exception Thrown if config data for the alpha vantage api wrapper hasn't been defined
      */
     public TimeSeriesResponse getIntraDayResponse(Interval interval, OutputSize outputSize, String symbol) throws Exception {
         if (API_CONFIG == null) {
@@ -62,12 +62,12 @@ public class StockAPI {
         }
         AlphaVantage.api().init(API_CONFIG);
         return AlphaVantage.api()
-                .timeSeries()
-                .intraday()
-                .forSymbol(symbol)
-                .interval(interval)
-                .outputSize(outputSize)
-                .fetchSync();
+            .timeSeries()
+            .intraday()
+            .forSymbol(symbol)
+            .interval(interval)
+            .outputSize(outputSize)
+            .fetchSync();
     }
 
     /**

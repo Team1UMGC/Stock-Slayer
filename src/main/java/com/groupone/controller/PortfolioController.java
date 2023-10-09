@@ -46,7 +46,11 @@ public class PortfolioController {
 
     @RequestMapping("/portfolio/sell/{stockId}")
     public RedirectView portfolioSellStock(@PathVariable int stockId){
-        stockService.sellStock(userService.getLogged(), stockId);
+        try{
+            stockService.sellStock(userService.getLogged(), stockId);
+        } catch (Exception e){
+            System.err.println(e.getMessage());
+        }
         return defaultRedirect;
     }
 }

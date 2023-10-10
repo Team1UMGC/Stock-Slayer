@@ -1,0 +1,139 @@
+/* /static/css/main.css */
+
+/* Importing the fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+
+/* Global Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5; /* Light background for the body */
+    color: #333; /* Dark text for contrast */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    font-family: 'Raleway', sans-serif; /* A distinct font for headings */
+    margin-bottom: 20px;
+    color: #222; /* Dark color for headings for emphasis */
+}
+
+p {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+a {
+    color: #3498db; /* A muted blue for links */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #2980b9;
+}
+
+/* Navbar styles */
+.navbar {
+    background-color: #fafafa;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between; /* Adjusted this to create space between logo and links */
+    padding: 10px 20px; /* Increased horizontal padding for a little spacing */
+    align-items: center; /* Vertically centers the logo and links */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar img { /* Style for the logo */
+    height: 50px;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0 auto; /* This centers the list of links */
+    padding: 0;
+    display: flex;
+}
+
+.navbar li {
+    margin: 0 10px;
+}
+
+.navbar a {
+    display: block;
+    color: #333;
+    text-align: center;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #f1f1f1;
+    color: #222;
+}
+
+/* Additional styles for forms, tables, etc. */
+form {
+    background-color: #fff; /* White background for forms */
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    border-radius: 4px;
+}
+
+input, select, textarea, button {
+    background-color: #fafafa; /* Light shade for form elements */
+    color: #333;
+    padding: 10px;
+    border: 1px solid #ddd; /* Light border for form elements */
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+button {
+    background-color: #3498db; /* Muted blue */
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9; /* A darker shade of blue for hover state */
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #fff; /* White background for the table */
+}
+    
+table, th, td {
+    border: 1px solid #ddd; /* Light border color for the table */
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    color: #333; /* Dark text color for readability */
+}
+
+th {
+    background-color: #fafafa; /* A light shade for table headers */
+    color: #222; /* Dark text for table headers for emphasis */
+}
+
+tr:hover {
+    background-color: #f1f1f1; /* A slightly darker shade when hovering over a row */
+}

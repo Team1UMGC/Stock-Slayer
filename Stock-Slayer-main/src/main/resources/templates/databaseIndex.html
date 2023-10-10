@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Database Index</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="align">
+
+    <div th:replace="fragments/navbar :: navbarFragment"></div>
+
+    <table id="user-table" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>email</th>
+                <th>password</th>
+                <th>isLocked</th>
+                <th>availableFunds</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="user:${userList}">
+                <td th:text="${user.getId()}"></td>
+                <td th:text="${user.getEmail()}"></td>
+                <td th:text="${user.getPassword()}"></td>
+                <td th:text="${user.getIsLocked()}"></td>
+                <td th:text="${user.getAvailableFunds()}"></td>
+                <td><a th:href="@{'/database/delete/user/' + ${user.getId()}}">Delete</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table id="stock-table" class="table table-bordered" style="width: 100%">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>ownerId</th>
+                <th>symbol</th>
+                <th>volume</th>
+                <th>value</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <br/>
+
+        <tbody>
+            <tr th:each="stock:${stockList}">
+                <td th:text="${stock.getId()}"></td>
+                <td th:text="${stock.getOwnerId()}"></td>
+                <td th:text="${stock.getSymbol()}"></td>
+                <td th:text="${stock.getVolume()}"></td>
+                <td th:text="${stock.getValue()}"></td>
+                <td><a th:href="@{'/database/delete/stock/' + ${stock.getId()}}">Delete</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br/>
+
+    <h1>Add User Entry</h1>
+    <form method="POST" action="/database/add/user">
+        <div id="user-input-area">
+            <input id="add-email"
+                   name="email"
+                   placeholder="Enter Email"
+                   required type="text"
+            />
+            <input id="add-password"
+                   name="password"
+                   placeholder="Enter Password"
+                   required type="password"
+            />
+        </div>
+        <br/>
+        <input type="submit" value="Add User"/>
+    </form>
+
+    <br/>
+
+    <h1>Add Stock Entry</h1>
+    <form method="POST" action="/database/add/stock">
+        <div id="stock-input-area">
+            <input id="add-stock-ownerId"
+                   name="ownerId"
+                   placeholder="Enter Owner ID"
+                   required type="number"
+            />
+            <input id="add-stock-symbol"
+                   name="symbol"
+                   placeholder="Enter Stock Symbol"
+                   required type="text"
+            />
+            <input id="add-stock-volume"
+                   name="volume"
+                   placeholder="Enter Volume"
+                   required type="number"
+                   step="0.1"
+            />
+            <input id="add-stock-value"
+                   name="value"
+                   placeholder="Enter Value"
+                   required type="number"
+                   step="0.1"
+            />
+        </div>
+        <br/>
+        <input type="submit" value="Add Stock"/>
+    </form>
+
+    <h1>Add Funds to User</h1>
+    <form method="POST" action="/database/addFunds/">
+        <div id="add-funds-input-area">
+            <input id="add-funds-userId"
+                   name="userId"
+                   placeholder="Enter User ID"
+                   required type="number"
+           />
+            <input id="add-funds-amount"
+                   name="funds"
+                   placeholder="Enter Amount"
+                   required type="number"
+                   step="0.01"
+           />
+        </div>
+        <br/>
+        <input type="submit" value="Add Funds"/>
+    </form>
+
+<!--    <h1>Update User Entry</h1>-->
+<!--    <form method="POST" action="/database/update/">-->
+<!--        <div id="user-update-area">-->
+<!--            <input id="get-id"-->
+<!--                   name="id"-->
+<!--                   required type="text"-->
+<!--                   placeholder="0"-->
+<!--            />-->
+<!--            <input id="update-email"-->
+<!--                   name="email"-->
+<!--                   placeholder="Enter Email"-->
+<!--                   required type="email"-->
+<!--           />-->
+<!--            <input id="update-password"-->
+<!--                   name="password"-->
+<!--                   placeholder="Enter Password"-->
+<!--                   required type="password"-->
+<!--           />-->
+<!--            <label>Toggle isLocked</label>-->
+<!--            <input id="update-isLocked"-->
+<!--                   name="isLocked"-->
+<!--                   required type="checkbox"-->
+<!--           />-->
+<!--        </div>-->
+<!--        <br/>-->
+<!--        <input type="submit" value="Update User"/>-->
+<!--    </form>-->
+
+</body>
+</html>

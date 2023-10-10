@@ -75,6 +75,10 @@ public class UserService {
         this.loggedAs = databaseService.getUserRecord(loggedAs.getEmail());
     }
 
+    public void logout(){
+        this.loggedAs = null;
+    }
+
     /**
      * Private method to check if the email and password matches the user email and password
      * @param user User, the one

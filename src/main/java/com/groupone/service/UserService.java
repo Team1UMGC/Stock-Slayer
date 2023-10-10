@@ -47,7 +47,7 @@ public class UserService {
      * @param password String, password that will be associated with this new account
      * @return boolean, if user has been added and found in the database successfully, return true, otherwise, false
      */
-    public boolean registerUser(String email, String password) throws UserNotFoundException {
+    public boolean registerUser(String email, String password) {
         boolean isRegister = false;
         databaseService.addUserRecord(email, password);
         try{

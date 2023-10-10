@@ -58,6 +58,7 @@ public class UserController {
                 }
             }catch (Exception e){
                 System.err.println(e.getMessage());
+                direct = new RedirectView("/register");
             }
         return direct;
     }

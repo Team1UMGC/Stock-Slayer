@@ -35,8 +35,9 @@ public class PortfolioController {
         try{
             System.out.println(stockService.getHeldStocks(user));
 
+            String userFunds = String.format("%.2f",stockService.getUserFunds(user));
             model.addAttribute("heldStocksList", stockService.getHeldStocks(user));
-            model.addAttribute("userFunds", stockService.getUserFunds(user));
+            model.addAttribute("userFunds", userFunds);
         }catch(Exception e){
             System.err.print(e.getMessage());
         }

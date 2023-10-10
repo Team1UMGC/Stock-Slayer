@@ -189,11 +189,11 @@ public class DatabaseAPITest {
                 : "Stock symbols should match";
 
         List<User> usersPaired = databaseAPI.pairUsersToStocks(queryForUsers(), queryForStocks());
-
         User userPaired = usersPaired.get(0);
+
         assert !userPaired.getStocks().isEmpty()
                 : "User should now be paired with a stock object";
-        assert (userPaired.getStocks().get(userRecord.getId()-1).getOwnerId() == queryForStocks().get(userRecord.getId()-1).getOwnerId())
+        assert (queryForStocks().get(userPaired.getStocks().get(0).getId()-1).getOwnerId() == userPaired.getId())
                 : "The paired stock should belong to the user with user ID "+userRecord.getId();
     }
 

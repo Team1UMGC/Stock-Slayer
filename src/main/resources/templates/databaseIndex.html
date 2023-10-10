@@ -3,29 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Database Index</title>
-    <style>
-    body {
-    padding: 20px;
-    }
-
-    .table {
-        width: 100%;
-    }
-
-    th {
-        background: #d2d2d2;
-        text-align: center;
-
-    }
-
-    td {
-        text-align: center;
-        background: #d2d2d2;
-    }
-    </style>
-
+    <link rel="stylesheet" th:href="@{/css/main.css}">
 </head>
 <body class="align">
+
+    <div th:replace="fragments/navbar :: navbarFragment"></div>
+
     <table id="user-table" class="table table-bordered">
         <thead>
             <tr>

@@ -72,7 +72,7 @@ public class UserController {
         try{
             if(userService.registerUser(email, password)){
                 userService.setLogged(new User(email, password));
-                direct = new RedirectView("portfolio");
+                direct = new RedirectView("/login");
             }
         }catch(Exception e){
             System.err.println(e.getMessage());

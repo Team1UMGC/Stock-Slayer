@@ -1,18 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Slayer Index</title>
-    <link rel="stylesheet" th:href="@{css/databaseIndex.css}">
+    <title>Home Page</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
 </head>
 <body>
-    <h1>Stock Slayer Index</h1> |
-    <a href="/login/">LOGIN</a> |
-    <a href="/register/">REGISTER</a> |
-    <a href="/portfolio/">PORTFOLIO</a> |
-    <a href="/main/">MAIN</a> |
-    <a href="/database/">DATABASE</a>
-</body>
 
+<div th:replace="fragments/navbar :: navbarFragment"></div>
+
+<div class="container">
+    <h1>Welcome to our Stock Platform</h1>
+    <p>
+        Here you can manage your stock portfolio, monitor stock prices, and perform transactions.
+    </p>
+
+</div>
+
+</body>
 </html>

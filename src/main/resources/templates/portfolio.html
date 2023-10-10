@@ -1,35 +1,18 @@
 <!-- Need to finish the controller for portfolio on the actual application code.-->
 
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio</title>
-    <style>
-        body {
-    padding: 20px;
-    }
-
-    .table {
-        width: 100%;
-    }
-
-    th {
-        background: #d2d2d2;
-        text-align: center;
-
-    }
-
-    td {
-        text-align: center;
-        background: #d2d2d2;
-    }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
 </head>
 <body class="align">
-    <h1>My Portfolio</h1>
 
+    <div th:replace="fragments/navbar :: navbarFragment"></div>
+
+    <h1>My Portfolio</h1>
     <table id="stocks-information-table" class="table table-bordered" style="width: 100%">
         <thead>
             <tr>
@@ -41,7 +24,6 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Loop through the user's portfolio stocks -->
             <tr th:each="stock:${heldStocksList}">
                 <td th:text="${stock.getSymbol()}"></td>
                 <td th:text="${stock.getValue()}"></td>
@@ -54,6 +36,5 @@
 
     <p>Total Funds: <span th:text="${userFunds}"></span></p>
 
-    <a href="/">Back to Slayer Index</a>
 </body>
 </html>

@@ -115,7 +115,7 @@ public class StockService {
     public void sellStock(User user, int stockId) throws Exception {
         Stock stock = null;
         stock = databaseAPI.getStockRecord(stockId);
-        databaseAPI.addAvailableFunds(user, requestCloseValue(stock.getSymbol()));
+        databaseAPI.addAvailableFunds(user, requestCloseValue(stock.getSymbol()) * stock.getVolume());
         databaseAPI.deleteStockRecord(stockId);
     }
 

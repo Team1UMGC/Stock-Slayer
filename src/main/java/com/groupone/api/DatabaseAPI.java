@@ -23,6 +23,8 @@ public class DatabaseAPI implements CommandLineRunner {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private double defaultRegisterFunds = 1_000.00;
+
     /**
      * Initializes the database if not already initialized.
      * Ran each time the spring boot app runs.
@@ -88,9 +90,9 @@ public class DatabaseAPI implements CommandLineRunner {
 
         if(isUserInDatabase) throw new UserAlreadyExistsException();
 
-        final String addSql = "INSERT INTO user (email, password) VALUES (?, ?)";
-        Object[] params = {email, password};
-        int[] types = {Types.VARCHAR, Types.VARCHAR};
+        final String addSql = "INSERT INTO user (email, password, availableFunds) VALUES (?, ?, ?)";
+        Object[] params = {email, password, defaultRegisterFunds};
+        int[] types = {Types.VARCHAR, Types.VARCHAR, Types.DOUBLE};
 
         this.jdbcTemplate.update(addSql, params, types);
         System.out.printf("Added User: %s%n", email);

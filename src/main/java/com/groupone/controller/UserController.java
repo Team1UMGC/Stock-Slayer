@@ -68,11 +68,11 @@ public class UserController {
     @PostMapping("/register/authenticate")
     public RedirectView RegisterAuth(@RequestParam("email") String email,
                                      @RequestParam("password") String password){
-        RedirectView direct = new RedirectView("register");
+        RedirectView direct = new RedirectView("/register");
         try{
             if(userService.registerUser(email, password)){
                 userService.setLogged(new User(email, password));
-                direct = new RedirectView("portfolio");
+                direct = new RedirectView("/portfolio");
             }
         }catch(Exception e){
             System.err.println(e.getMessage());
